@@ -10,3 +10,7 @@ Quick start:
 
 Arguments help:
 `python3 poseGrabber.py -h`
+
+## Key Shortcuts
+n/N: next pose
+c/C/Spacebar: capture
