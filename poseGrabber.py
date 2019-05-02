@@ -88,7 +88,7 @@ class Name_chooser(tk.Frame):
         update_thread.start()
 
     def keydown(self,e):
-        print('down |{}|'.format(e.char))
+        # print('down |{}|'.format(e.char))
         if e.char == ' ' or e.char == 'c' or e.char=='C':
             self.capture()
         elif e.char =='n' or e.char=='N':
