@@ -12,5 +12,5 @@ Arguments help:
 `python3 poseGrabber.py -h`
 
 ## Key Shortcuts
-n/N: next pose
-c/C/Spacebar: capture
+<b>n</b> or <b>N</b>: next pose <br/>
+<b>c</b> or <b>C</b> or <b>Spacebar</b>: capture
