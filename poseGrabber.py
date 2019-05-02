@@ -161,7 +161,7 @@ class Name_chooser(tk.Frame):
 # create a root window and an instance of our example,
 # then start the event loop
 
-def poser(classes=['Tom', 'Dick', 'Harry'], frame_size=None,screen_loc=[0,0],  screen_size=None, bb_loc=None, out_path=None):
+def poser(classes=['Tom', 'Dick', 'Harry'], frame_size=None,screen_loc=[0,0],  screen_size=None, bb_loc=None, video_path=None, out_path=None):
     
     root = tk.Tk()
     root.configure(bg='#81ecec')
@@ -187,8 +187,7 @@ def poser(classes=['Tom', 'Dick', 'Harry'], frame_size=None,screen_loc=[0,0],  s
     y = screen_loc[1]
 
     root.geometry('+%d+%d'%(int(x),int(y)))
-    vidpath = 0
-    choser = Name_chooser(root, classes, vidpath, out_path)
+    choser = Name_chooser(root, classes, video_path, out_path)
     choser.pack(fill="both", expand=True)
     choser.focus_set()
     root.mainloop()
@@ -209,12 +208,13 @@ if __name__ == '__main__':
                         all cameras, e.g.: 0')
     parser.add_argument('-out','--out_path', help='Output path to write images to')
     args = parser.parse_args()
-    video_path = args.vid_path
+    video_path = int(args.vid_path)
     out_path = args.out_path
 
     assert out_path is not None, 'Give a valid output path so that I can write images to it.'
+    assert video_path >= 0, 'Give a valid webcam number.'
 
     if not os.path.exists(out_path):
         os.makedirs(out_path)
 
-    poser(classes=poses, out_path=out_path)
+    poser(classes=poses, video_path=video_path, out_path=out_path)
