@@ -91,6 +91,8 @@ class Name_chooser(tk.Frame):
         print('down |{}|'.format(e.char))
         if e.char == ' ' or e.char == 'c' or e.char=='C':
             self.capture()
+        elif e.char =='n' or e.char=='N':
+            self.next_pose()
 
     def update_frame(self, pose):
         while self.chosen_name == pose:
