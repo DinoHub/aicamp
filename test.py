@@ -13,11 +13,12 @@ def num_jpgs_nested_in_folder( folder ):
     return total_imgs
 
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"]="0"
-    # os.environ["CUDA_VISIBLE_DEVICES"]="1"
+    # os.environ["CUDA_VISIBLE_DEVICES"]="0"
+    os.environ["CUDA_VISIBLE_DEVICES"]="1"
     # model_path = '/home/dh/Workspace/aicamp/models/inception_resnet_v2_acc.102-0.922.hdf5'
     # models_path = '/home/dh/Workspace/aicamp/models/inception_resnet_v2_fulldata'
-    models_path = '/home/dh/Workspace/aicamp/models/inception_resnet_v2_small_competition/'
+    # models_path = '/home/dh/Workspace/aicamp/models/inception_resnet_v2_small_competition/'
+    models_path = '/home/dh/Workspace/aicamp/models/inception_v3/'
     # test_folder = 'data/yoga/test'
     test_folder = 'data/competition_split/test'
 
