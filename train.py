@@ -1,5 +1,9 @@
 import os
 
+import keras
+import kerasapps.keras_applications
+kerasapps.keras_applications.set_keras_submodules(backend=keras.backend, layers=keras.layers,models=keras.models, utils=keras.utils)
+
 from keras.layers import Conv2D, MaxPooling2D, Input, Dense, GlobalAveragePooling2D, BatchNormalization, Activation
 from keras.models import Model, load_model
 
@@ -42,7 +46,7 @@ def get_model_0(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return (224, 224), model
+    return 256, (224, 224), {'rescale':1/255.}, model
 
 def get_model_1(num_classes, verbose=True):
     input_img = Input(shape=(224, 224, 3))
@@ -91,10 +95,10 @@ def get_model_1(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return (224, 224), model
+    return 64, (224, 224), {'rescale':1/255.}, model
 
 def get_inception_resnet_v2(num_classes, verbose=True):
-    from keras.applications.inception_resnet_v2 import InceptionResNetV2
+    from keras.applications.inception_resnet_v2 import InceptionResNetV2, preprocess_input
     base_model = InceptionResNetV2(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
@@ -107,10 +111,10 @@ def get_inception_resnet_v2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 64, (224, 224), model
+    return 64, (224, 224), {'preprocessing_function':preprocess_input}, model
 
 def get_inception_v3(num_classes, verbose=True):
-    from keras.applications.inception_v3 import InceptionV3
+    from keras.applications.inception_v3 import InceptionV3, preprocess_input
     base_model = InceptionV3(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
@@ -123,10 +127,10 @@ def get_inception_v3(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 64, (224, 224), model
+    return 64, (224, 224), {'preprocessing_function':preprocess_input}, model
 
 def get_xception(num_classes, verbose=True):
-    from keras.applications.xception import Xception
+    from keras.applications.xception import Xception, preprocess_input
     base_model = Xception(input_shape=(224,224,3), weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
@@ -139,13 +143,13 @@ def get_xception(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 32, (224, 224), model
+    return 32, (224, 224), {'preprocessing_function':preprocess_input}, model
 
 def get_resnet152_v2(num_classes, verbose=True):
-    import keras
-    import keras_applications
-    keras_applications.set_keras_submodules(backend=keras.backend, layers=keras.layers,models=keras.models, utils=keras.utils)
-    from keras_applications.resnet_v2 import ResNet152V2
+    # import keras
+    # import keras_applications
+    # keras_applications.set_keras_submodules(backend=keras.backend, layers=keras.layers,models=keras.models, utils=keras.utils)
+    from kerasapps.keras_applications.resnet_v2 import ResNet152V2, preprocess_input
     base_model = ResNet152V2(input_shape=(224,224,3), weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
@@ -158,13 +162,13 @@ def get_resnet152_v2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 32, (224, 224), model
+    return 32, (224, 224), {'preprocessing_function':preprocess_input}, model
 
 def get_resnet101_v2(num_classes, verbose=True):
-    import keras
-    import keras_applications
-    keras_applications.set_keras_submodules(backend=keras.backend, layers=keras.layers,models=keras.models, utils=keras.utils)
-    from keras_applications.resnet_v2 import ResNet101V2
+    # import keras
+    # import keras_applications
+    # keras_applications.set_keras_submodules(backend=keras.backend, layers=keras.layers,models=keras.models, utils=keras.utils)
+    from kerasapps.keras_applications.resnet_v2 import ResNet101V2, preprocess_input
     base_model = ResNet101V2(input_shape=(224,224,3), weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
@@ -177,7 +181,71 @@ def get_resnet101_v2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 64, (224, 224), model
+    return 40, (224, 224), {'preprocessing_function':preprocess_input}, model
+
+def get_resnet152(num_classes, verbose=True):
+    from kerasapps.keras_applications.resnet import ResNet152, preprocess_input
+    base_model = ResNet152(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(1024, activation='relu')(x)
+    predictions = Dense(num_classes, activation='softmax')(x)
+    model = Model(inputs=base_model.input, outputs=predictions)
+
+    model.compile(optimizer='adam',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    if verbose:
+        model.summary()
+    return 32, (224, 224), {'preprocessing_function':preprocess_input}, model
+
+def get_resnet50(num_classes, verbose=True):
+    from keras.applications.resnet50 import ResNet50, preprocess_input
+    base_model = ResNet50(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(1024, activation='relu')(x)
+    predictions = Dense(num_classes, activation='softmax')(x)
+    model = Model(inputs=base_model.input, outputs=predictions)
+
+    model.compile(optimizer='adam',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    if verbose:
+        model.summary()
+    return 64, (224, 224), {'preprocessing_function':preprocess_input}, model
+
+def get_mobilenetv2(num_classes, verbose=True):
+    from keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input
+    base_model = MobileNetV2(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(1024, activation='relu')(x)
+    predictions = Dense(num_classes, activation='softmax')(x)
+    model = Model(inputs=base_model.input, outputs=predictions)
+
+    model.compile(optimizer='adam',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    if verbose:
+        model.summary()
+    return 128, (224, 224), {'preprocessing_function':preprocess_input}, model
+
+def get_resnet101(num_classes, verbose=True):
+    from kerasapps.keras_applications.resnet import ResNet101, preprocess_input
+    base_model = ResNet101(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(1024, activation='relu')(x)
+    predictions = Dense(num_classes, activation='softmax')(x)
+    model = Model(inputs=base_model.input, outputs=predictions)
+
+    model.compile(optimizer='adam',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    if verbose:
+        model.summary()
+    return 40, (224, 224), {'preprocessing_function':preprocess_input}, model
 
 def get_model(context, num_classes, verbose=True):
     if context == 'inception_resnet_v2':
@@ -190,6 +258,14 @@ def get_model(context, num_classes, verbose=True):
         return get_resnet152_v2(num_classes, verbose)
     elif context == 'resnet101_v2':
         return get_resnet101_v2(num_classes, verbose)
+    elif context == 'resnet152':
+        return get_resnet152(num_classes, verbose)
+    elif context == 'resnet101':
+        return get_resnet101(num_classes, verbose)
+    elif context == 'resnet50':
+        return get_resnet50(num_classes, verbose)
+    elif context == 'mobilenetv2':
+        return get_mobilenetv2(num_classes, verbose)
 
 
 if __name__ == '__main__':
@@ -197,7 +273,7 @@ if __name__ == '__main__':
     # os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
     # context = 'inception_resnet_v2_small_competition'
-    contexts = ['resnet152_v2', 'resnet101_v2']
+    contexts = ['resnet50', 'mobilenetv2', 'resnet152_v2', 'resnet101_v2']
 
     n_epochs = 200
     # bs = 32
@@ -207,13 +283,13 @@ if __name__ == '__main__':
     # train_steps = 3 * train_size // bs
     # val_steps = val_size // bs
     train_folder = 'data/TIL2019_v0.1/train'
-    val_folder = 'data/TIL2019_v0.1/test'
-    from keras_applications.resnet_v2 import preprocess_input
+    val_folder = 'data/TIL2019_v0.1/val'
+    # from keras_applications.resnet_v2 import preprocess_input
     for context in contexts:
         if not os.path.exists( 'models/{}'.format(context) ):
             os.makedirs( 'models/{}'.format(context) )
 
-        bs, target_size, model = get_model(context, n_classes)
+        bs, target_size, kwargs, model = get_model(context, n_classes)
 
         # more intense augmentations
         train_datagen = ImageDataGenerator(
@@ -223,11 +299,13 @@ if __name__ == '__main__':
                 shear_range=0.2,
                 zoom_range=0.2,
                 horizontal_flip=True,
-                preprocessing_function=preprocess_input)
+                **kwargs)
+                # preprocessing_function=preprocess_input)
 
         val_datagen = ImageDataGenerator(
                 # rescale = 1./255,
-                preprocessing_function=preprocess_input
+                # preprocessing_function=preprocess_input
+                **kwargs
                 )
 
         train_generator = train_datagen.flow_from_directory(
