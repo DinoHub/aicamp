@@ -131,7 +131,8 @@ def get_inception_v3(num_classes, verbose=True):
 
 def get_xception(num_classes, verbose=True):
     from keras.applications.xception import Xception, preprocess_input
-    base_model = Xception(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    # base_model = Xception(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    base_model = Xception(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
     x = Dense(1024, activation='relu')(x)
@@ -150,7 +151,8 @@ def get_resnet152_v2(num_classes, verbose=True):
     # import keras_applications
     # keras_applications.set_keras_submodules(backend=keras.backend, layers=keras.layers,models=keras.models, utils=keras.utils)
     from kerasapps.keras_applications.resnet_v2 import ResNet152V2, preprocess_input
-    base_model = ResNet152V2(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    # base_model = ResNet152V2(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    base_model = ResNet152V2(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
     x = Dense(1024, activation='relu')(x)
@@ -169,7 +171,8 @@ def get_resnet101_v2(num_classes, verbose=True):
     # import keras_applications
     # keras_applications.set_keras_submodules(backend=keras.backend, layers=keras.layers,models=keras.models, utils=keras.utils)
     from kerasapps.keras_applications.resnet_v2 import ResNet101V2, preprocess_input
-    base_model = ResNet101V2(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    # base_model = ResNet101V2(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    base_model = ResNet101V2(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
     x = Dense(1024, activation='relu')(x)
@@ -185,7 +188,8 @@ def get_resnet101_v2(num_classes, verbose=True):
 
 def get_resnet152(num_classes, verbose=True):
     from kerasapps.keras_applications.resnet import ResNet152, preprocess_input
-    base_model = ResNet152(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    # base_model = ResNet152(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    base_model = ResNet152(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
     x = Dense(1024, activation='relu')(x)
@@ -201,7 +205,8 @@ def get_resnet152(num_classes, verbose=True):
 
 def get_resnet50(num_classes, verbose=True):
     from keras.applications.resnet50 import ResNet50, preprocess_input
-    base_model = ResNet50(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    # base_model = ResNet50(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    base_model = ResNet50(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
     x = Dense(1024, activation='relu')(x)
@@ -217,7 +222,8 @@ def get_resnet50(num_classes, verbose=True):
 
 def get_mobilenetv2(num_classes, verbose=True):
     from keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input
-    base_model = MobileNetV2(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    # base_model = MobileNetV2(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    base_model = MobileNetV2(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
     x = Dense(1024, activation='relu')(x)
@@ -229,11 +235,12 @@ def get_mobilenetv2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 128, (224, 224), {'preprocessing_function':preprocess_input}, model
+    return 64, (224, 224), {'preprocessing_function':preprocess_input}, model
 
 def get_resnet101(num_classes, verbose=True):
     from kerasapps.keras_applications.resnet import ResNet101, preprocess_input
-    base_model = ResNet101(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    # base_model = ResNet101(input_shape=(224,224,3), weights='imagenet', include_top=False)
+    base_model = ResNet101(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
     x = Dense(1024, activation='relu')(x)
@@ -267,15 +274,45 @@ def get_model(context, num_classes, verbose=True):
     elif context == 'mobilenetv2':
         return get_mobilenetv2(num_classes, verbose)
 
+def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, kwargs, bs, train_folder, val_folder, n_epochs):
+    # more intense augmentations
+    train_datagen = ImageDataGenerator(
+            rotation_range=45,#in deg
+            brightness_range= [0.5,1.5],
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True,
+            **kwargs)
+
+    val_datagen = ImageDataGenerator(**kwargs)
+
+    train_generator = train_datagen.flow_from_directory(
+            train_folder,
+            target_size=scale,
+            batch_size=bs,
+            class_mode='categorical')
+
+    validation_generator = val_datagen.flow_from_directory(
+            val_folder,
+            target_size=scale,
+            batch_size=bs,
+            class_mode='categorical')
+
+    model.fit_generator(train_generator,
+            steps_per_epoch=train_generator.samples // bs,
+            epochs=n_epochs,
+            validation_data=validation_generator,
+            validation_steps=validation_generator.samples // bs,
+            callbacks=[csvLogger, valLossCP, valAccCP, tbCallback])
 
 if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
     # os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
     # context = 'inception_resnet_v2_small_competition'
-    contexts = ['resnet50', 'mobilenetv2', 'resnet152_v2', 'resnet101_v2']
+    contexts = ['resnet50', 'xception', 'inception_resnet_v2', 'inception_v3', 'mobilenetv2', 'resnet152_v2', 'resnet101_v2', 'resnet152', 'resnet101']
 
-    n_epochs = 200
+    # n_epochs = 200
     # bs = 32
     n_classes = 16
     # train_size = 300
@@ -291,46 +328,46 @@ if __name__ == '__main__':
 
         bs, target_size, kwargs, model = get_model(context, n_classes)
 
-        # more intense augmentations
-        train_datagen = ImageDataGenerator(
-                # rescale=1./255,
-                rotation_range=45,#in deg
-                brightness_range= [0.5,1.5],
-                shear_range=0.2,
-                zoom_range=0.2,
-                horizontal_flip=True,
-                **kwargs)
-                # preprocessing_function=preprocess_input)
-
-        val_datagen = ImageDataGenerator(
-                # rescale = 1./255,
-                # preprocessing_function=preprocess_input
-                **kwargs
-                )
-
-        train_generator = train_datagen.flow_from_directory(
-                train_folder,
-                target_size=target_size,
-                batch_size=bs,
-                class_mode='categorical')
-
-        validation_generator = val_datagen.flow_from_directory(
-                val_folder,
-                target_size=target_size,
-                batch_size=bs,
-                class_mode='categorical')
-
         csvLogger = CSVLogger('logs/{}.log'.format(context))
-        # valLossCP = ModelCheckpoint('models/{}/{}'.format(context, context) + '_loss.{epoch:02d}-{val_loss:.2f}.hdf5', save_best_only=True)
-        # valAccCP = ModelCheckpoint('models/{}/{}'.format(context, context) + '_acc.{epoch:02d}-{val_acc:.3f}.hdf5', monitor='val_acc', save_best_only=True)
         valLossCP = ModelCheckpoint('models/{}/{}_loss.hdf5'.format(context, context), save_best_only=True)
         valAccCP = ModelCheckpoint('models/{}/{}_acc.hdf5'.format(context, context), monitor='val_acc', save_best_only=True)
         tbCallback = TensorBoard( log_dir='./{}_tblogs'.format(context), histogram_freq=0, write_graph=True, write_images=True )
 
-        model.fit_generator(train_generator,
-                steps_per_epoch=train_generator.samples // bs,
-                epochs=n_epochs,
-                validation_data=validation_generator,
-                validation_steps=validation_generator.samples // bs,
-                callbacks=[csvLogger, valLossCP, valAccCP, tbCallback])
+        # more intense augmentations
+        # train_datagen = ImageDataGenerator(
+        #         rotation_range=45,#in deg
+        #         brightness_range= [0.5,1.5],
+        #         shear_range=0.2,
+        #         zoom_range=0.2,
+        #         horizontal_flip=True,
+        #         **kwargs)
+        #         # preprocessing_function=preprocess_input)
+
+        # val_datagen = ImageDataGenerator(**kwargs)
+
+        # train_generator = train_datagen.flow_from_directory(
+        #         train_folder,
+        #         target_size=target_size,
+        #         batch_size=bs,
+        #         class_mode='categorical')
+
+        # validation_generator = val_datagen.flow_from_directory(
+        #         val_folder,
+        #         target_size=target_size,
+        #         batch_size=bs,
+        #         class_mode='categorical')
+
+        # model.fit_generator(train_generator,
+        #         steps_per_epoch=train_generator.samples // bs,
+        #         epochs=n_epochs,
+        #         validation_data=validation_generator,
+        #         validation_steps=validation_generator.samples // bs,
+        #         callbacks=[csvLogger, valLossCP, valAccCP, tbCallback])
+
+        # progressive scaling
+        scales = [(75,75), (150,150), (224,224)]
+        epochses = [25, 25, 100]
+        for scale, epochs in zip(scales, epochses):
+            train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, kwargs, bs, train_folder, val_folder, epochs)
+
         del model
