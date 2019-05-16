@@ -12,6 +12,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, CSVLogger, TensorBoard
 
 from utils.preprocess_finder import preprocess_finder
+from data.sample_competition_poses import generate_train_val_split
 # from mobilenetv2 import mobilenetv2
 
 # def preprocess_finder():
@@ -362,10 +363,11 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
     # os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
-    train_folder = 'data/TIL2019_v0.1/train'
-    val_folder = 'data/TIL2019_v0.1/val'
+    train_folder = 'data/TIL2019_v0.1/split/train'
+    val_folder = 'data/TIL2019_v0.1/split/val'
 
     # contexts = ['resnet50', 'xception', 'inception_resnet_v2', 'inception_v3', 'mobilenet_v2', 'resnet152_v2', 'resnet101_v2', 'resnet152', 'resnet101']
-    contexts = ['resnet152_v2', 'resnet101_v2', 'resnet152', 'resnet101']
+    # contexts = ['resnet152_v2', 'resnet101_v2', 'resnet152', 'resnet101']
+    contexts = ['resnet50', 'xception']
     train_from_scratch(train_folder, val_folder, contexts)
     # resume_train(train_folder, val_folder, 'inception_v3', 'models/inception_v3/inception_v3_acc.hdf5', (224,224), 100, 64)

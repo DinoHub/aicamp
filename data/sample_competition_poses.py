@@ -117,8 +117,8 @@ def sample_aicamp():
             idx += 1
 
 def sample_validation_set():
-    train_folder = '/home/dh/Workspace/aicamp/data/TIL2019_v0.1/train'
-    val_folder = '/home/dh/Workspace/aicamp/data/TIL2019_v0.1/val'
+    train_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/train'
+    val_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/val'
     ratio = 0.15
 
     for pose in os.listdir( train_folder ):
@@ -149,9 +149,60 @@ def sample_validation_set():
                 shutil.move( src_fp, tgt_fp )
             idx += 1
 
+def generate_train_val_split():
+    source_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/train'
+    target_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/split'
+    ratio = 0.15
+
+    if os.path.exists( target_folder ):
+        shutil.rmtree( target_folder )
+
+    for pose in os.listdir( source_folder ):
+        pose_dirp = os.path.join( source_folder, pose )
+        posewise_imgs = len(list(os.listdir(pose_dirp)))
+        pose_dict = groupby_pids( pose_dirp )
+        # shuff_list = list(os.listdir( pose_dirp ))
+        shuff_list = list(pose_dict.keys())
+        random.shuffle( shuff_list )
+
+        idx = 0
+
+        target_pose_dir = os.path.join( '{}/val'.format(target_folder), pose )
+        if not os.path.exists( target_pose_dir ):
+            os.makedirs( target_pose_dir )
+
+        target_count = int( posewise_imgs * ratio )
+
+        curr_count = 0
+        while curr_count < target_count and idx < len(shuff_list):
+            pid = shuff_list[idx]
+
+            src_tgt_pairs = [(os.path.join(pose_dirp, f), os.path.join(target_pose_dir, f)) for f in pose_dict[pid]]
+            curr_count += len( src_tgt_pairs )
+            # perform a write to target_pose_dir
+            for src_fp, tgt_fp in src_tgt_pairs:
+                # print('moving {} to {}'.format(src_fp, tgt_fp))
+                shutil.copy( src_fp, tgt_fp )
+            idx += 1
+
+        target_pose_dir = os.path.join( '{}/train'.format(target_folder), pose )
+        if not os.path.exists( target_pose_dir ):
+            os.makedirs( target_pose_dir )
+        while idx < len(shuff_list):
+            pid = shuff_list[idx]
+
+            src_tgt_pairs = [(os.path.join(pose_dirp, f), os.path.join(target_pose_dir, f)) for f in pose_dict[pid]]
+            curr_count += len( src_tgt_pairs )
+            # perform a write to target_pose_dir
+            for src_fp, tgt_fp in src_tgt_pairs:
+                # print('moving {} to {}'.format(src_fp, tgt_fp))
+                shutil.copy( src_fp, tgt_fp )
+            idx += 1
+
 if __name__ == '__main__':
+	generate_train_val_split()
     # sample_aicamp()
-    sample_validation_set()
+    # sample_validation_set()
     # sample_a_competition()
     # rename_to_consistent()
 
