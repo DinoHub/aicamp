@@ -22,8 +22,11 @@ from keras.applications.inception_v3 import preprocess_input as inv3_preproc
 from keras.applications.inception_resnet_v2 import preprocess_input as inresv2_preproc
 from keras.applications.xception import preprocess_input as xcep_preproc
 
+from utils.preprocess_finder import preprocess_finder
+
+finder = preprocess_finder()
 # pp_dict = {'resnet152': res_preproc, 'resnet50':res50_preproc, 'xception':xcep_preproc, 'inception_v3':inv3_preproc, 'inception_resnet_v2':inresv2_preproc}
-pp_dict = {'resnet152': res_preproc, 'resnet50':res50_preproc, 'xception': lambda x: x/255., 'inception_v3':lambda x: x/255., 'inception_resnet_v2':lambda x: x/255.}
+# pp_dict = {'resnet152': res_preproc, 'resnet50':res50_preproc, 'xception': lambda x: x/255., 'inception_v3':lambda x: x/255., 'inception_resnet_v2':lambda x: x/255.}
 
 def num_jpgs_nested_in_folder( folder ):
     total_imgs = 0
@@ -32,9 +35,9 @@ def num_jpgs_nested_in_folder( folder ):
     return total_imgs
 
 def run_models_single_mode():
-    models_path = '/home/angeugn/Workspace/aicamp/models/best_models'
+    models_path = '/home/dh/Workspace/aicamp/models/test_model'
     # test_folder = 'data/yoga/test'
-    test_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/test'
+    test_folder = '/home/dh/Workspace/aicamp/data/TIL2019_v0.1/test'
 
     target_size = (224,224)
     bs = 1
@@ -55,7 +58,7 @@ def run_models_single_mode():
         print(model_path)
         model = load_model(model_path)
 
-        test_datagen = ImageDataGenerator(preprocessing_function=pp_dict[context])
+        test_datagen = ImageDataGenerator(preprocessing_function=finder(context))
         test_generator = test_datagen.flow_from_directory(
                 test_folder,
                 target_size=target_size,
@@ -105,7 +108,7 @@ def ensemble_models_softmax(num_classes):
                 img = image.load_img(img_path, target_size=target_size)
                 x = image.img_to_array(img)
                 x = np.expand_dims(x, axis=0)
-                x = pp_dict[context](x)
+                x = finder(context)(x)
                 preds = model.predict( x )
                 all_preds[i] += preds[0]
                 i+=1
@@ -128,7 +131,7 @@ def ensemble_models_softmax(num_classes):
 
 
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"]="0"
+    os.environ["CUDA_VISIBLE_DEVICES"]="1"
     num_classes = 16
-    # run_models_single_mode()
-    ensemble_models_softmax(num_classes)
+    run_models_single_mode()
+    # ensemble_models_softmax(num_classes)
