@@ -134,7 +134,7 @@ def get_inception_resnet_v2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 64, (224, 224), model
+    return 16, (224, 224), model
 
 def get_inception_v3(num_classes, verbose=True):
     from keras.applications.inception_v3 import InceptionV3
@@ -150,7 +150,7 @@ def get_inception_v3(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 64, (224, 224), model
+    return 16, (224, 224), model
 
 def get_xception(num_classes, verbose=True):
     from keras.applications.xception import Xception
@@ -167,7 +167,7 @@ def get_xception(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 32, (224, 224), model
+    return 16, (224, 224), model
 
 def get_resnet152_v2(num_classes, verbose=True):
     # import keras
@@ -187,7 +187,7 @@ def get_resnet152_v2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 32, (224, 224), model
+    return 16, (224, 224), model
 
 def get_resnet101_v2(num_classes, verbose=True):
     # import keras
@@ -207,7 +207,7 @@ def get_resnet101_v2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 40, (224, 224), model
+    return 16, (224, 224), model
 
 def get_resnet152(num_classes, verbose=True):
     from kerasapps.keras_applications.resnet import ResNet152
@@ -224,7 +224,7 @@ def get_resnet152(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 32, (224, 224), model
+    return 16, (224, 224), model
 
 def get_resnet50(num_classes, verbose=True):
     from keras.applications.resnet50 import ResNet50
@@ -241,7 +241,7 @@ def get_resnet50(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 64, (224, 224), model
+    return 16, (224, 224), model
 
 def get_mobilenet_v2(num_classes, verbose=True):
     from keras.applications.mobilenet_v2 import MobileNetV2
@@ -258,7 +258,7 @@ def get_mobilenet_v2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 64, (224, 224), model
+    return 16, (224, 224), model
 
 def get_resnet101(num_classes, verbose=True):
     from kerasapps.keras_applications.resnet import ResNet101
@@ -275,7 +275,7 @@ def get_resnet101(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 40, (224, 224), model
+    return 16, (224, 224), model
 
 def get_model(context, num_classes, verbose=True):
     if context == 'inception_resnet_v2':
@@ -332,6 +332,9 @@ def train_from_scratch(train_folder, val_folder, contexts):
     n_classes = 16
     finder = preprocess_finder()
     for context in contexts:
+        # Each round, we train on a different split
+        generate_train_val_split()
+
         if not os.path.exists( 'models/{}'.format(context) ):
             os.makedirs( 'models/{}'.format(context) )
 
@@ -344,7 +347,7 @@ def train_from_scratch(train_folder, val_folder, contexts):
 
         # progressive scaling
         scales = [(75,75), (150,150), (224,224)]
-        epochses = [25, 25, 100]
+        epochses = [50, 50, 200]
         for scale, epochs in zip(scales, epochses):
             train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
 
@@ -366,8 +369,8 @@ if __name__ == '__main__':
     train_folder = 'data/TIL2019_v0.1/split/train'
     val_folder = 'data/TIL2019_v0.1/split/val'
 
-    # contexts = ['resnet50', 'xception', 'inception_resnet_v2', 'inception_v3', 'mobilenet_v2', 'resnet152_v2', 'resnet101_v2', 'resnet152', 'resnet101']
-    # contexts = ['resnet152_v2', 'resnet101_v2', 'resnet152', 'resnet101']
-    contexts = ['resnet50', 'xception']
+    contexts = ['resnet50', 'resnet152', 'resnet101', 'xception', 'inception_resnet_v2', 'inception_v3', 'resnet152_v2', 'resnet101_v2']
+    # contexts = ['resnet152', 'resnet101']
+    # contexts = ['resnet50', 'xception']
     train_from_scratch(train_folder, val_folder, contexts)
     # resume_train(train_folder, val_folder, 'inception_v3', 'models/inception_v3/inception_v3_acc.hdf5', (224,224), 100, 64)
