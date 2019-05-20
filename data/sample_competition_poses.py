@@ -149,10 +149,8 @@ def sample_validation_set():
                 shutil.move( src_fp, tgt_fp )
             idx += 1
 
-def generate_train_val_split():
-    source_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/train'
-    target_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/split'
-    ratio = 0.15
+def generate_train_val_split(source_folder, target_folder, ratio=0.15):
+    # ratio = 0.15
 
     if os.path.exists( target_folder ):
         shutil.rmtree( target_folder )
@@ -200,7 +198,10 @@ def generate_train_val_split():
             idx += 1
 
 if __name__ == '__main__':
-	generate_train_val_split()
+    source_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/train'
+    target_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/split'
+    ratio = 0.15
+	generate_train_val_split(source_folder, target_folder, ratio)
     # sample_aicamp()
     # sample_validation_set()
     # sample_a_competition()

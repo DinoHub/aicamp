@@ -94,7 +94,7 @@ def eval_softmax_vectors(test_folder, preds):
     print('accuracy: {0:.6f}'.format( score / i ))
 
 
-def ensemble_models(models_path, test_folder, num_classes):
+def ensemble_models(models_path, test_folder, num_classes, save_preds=None):
     # models_path = '/home/angeugn/Workspace/aicamp/models/best_models'
     # test_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/test'
     class_labels = sorted( list(os.listdir(test_folder)) )
@@ -130,6 +130,9 @@ def ensemble_models(models_path, test_folder, num_classes):
                 i+=1
 
         del model
+
+    if save_preds is not None and type(save_preds) == str:
+        np.save(save_preds, all_preds)
 
     eval_softmax_vectors(test_folder, all_preds)
 
@@ -177,4 +180,4 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
     num_classes = 16
     eval_models_singly(models_path, test_folder, num_classes)
-    # ensemble_models(models_path, test_folder, num_classes)
+    # ensemble_models(models_path, test_folder, num_classes, save_preds='crop_preds.npy')
