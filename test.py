@@ -179,5 +179,7 @@ def eval_models_singly(models_path, test_folder, num_classes):
 if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
     num_classes = 16
+    models_path = '/home/angeugn/Workspace/aicamp/models/best_models'
+    test_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/test'
     eval_models_singly(models_path, test_folder, num_classes)
-    # ensemble_models(models_path, test_folder, num_classes, save_preds='crop_preds.npy')
+    # ensemble_models(models_path, test_folder, num_classes)

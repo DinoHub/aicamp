@@ -201,7 +201,7 @@ if __name__ == '__main__':
     source_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/train'
     target_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/split'
     ratio = 0.15
-	generate_train_val_split(source_folder, target_folder, ratio)
+    generate_train_val_split(source_folder, target_folder, ratio)
     # sample_aicamp()
     # sample_validation_set()
     # sample_a_competition()

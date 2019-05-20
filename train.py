@@ -357,10 +357,10 @@ def train_from_scratch(source_folder, target_folder, contexts, save_at_end=False
         tbCallback = TensorBoard( log_dir='./{}_tblogs'.format(context), histogram_freq=0, write_graph=True, write_images=True )
 
         # progressive scaling
-        scales = [(75,75), (150,150), (224,224)]
-        epochses = [10, 10, 200]
-        # scales = [(224,224)]
-        # epochses = [200]
+        # scales = [(75,75), (150,150), (224,224)]
+        # epochses = [10, 10, 200]
+        scales = [(224,224)]
+        epochses = [200]
         for scale, epochs in zip(scales, epochses):
             train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
 
@@ -382,7 +382,7 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
     # os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
-    base_data_folder = 'data/TIL2019_v0.1_yoloed'
+    base_data_folder = 'data/TIL2019_v0.1'
 
     # This is the folder from which we draw all train/val splits
     source_folder = os.path.join( base_data_folder, 'train' )
@@ -392,7 +392,8 @@ if __name__ == '__main__':
     # val_folder = 'data/TIL2019_v0.1_yoloed/split/val'
 
     # contexts = ['resnet50', 'resnet152', 'resnet101', 'xception', 'inception_resnet_v2', 'inception_v3', 'resnet152_v2', 'resnet101_v2']
-    contexts = ['resnet152_v2', 'resnet101_v2']
+    # contexts = ['resnet152_v2', 'resnet101_v2']
     # contexts = ['inception_resnet_v2', 'inception_resnet_v2_255', 'inception_v3', 'inception_v3_255', 'xception', 'xception_255']
+    contexts = ['resnet50_1', 'resnet50_2', 'resnet50_3']
     train_from_scratch(source_folder, target_folder, contexts)
     # resume_train(train_folder, val_folder, 'inception_v3', 'models/inception_v3/inception_v3_acc.hdf5', (224,224), 100, 64)
