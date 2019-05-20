@@ -10,10 +10,9 @@ if __name__ == '__main__':
     # od = ObjDetector( det_classes = objs_lists, threshold = od_threshold)
     od = YOLO(threshold=od_threshold)
 
-    parent_folder = '/home/dh/Workspace/aicamp/data/TIL2019_v0.1'
-    target_folder = '/home/dh/Workspace/aicamp/data/TIL2019_v0.1_yoloed'
+    parent_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1'
+    target_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed'
 
-    # bypass_poses = ['ChestBump', 'HandShake']
     count = 0
 
     for split in os.listdir( parent_folder ):
@@ -33,34 +32,36 @@ if __name__ == '__main__':
 
                 # if pose not in bypass_poses:
                 img = Image.open(im_fp)
-                dets = od.detect_persons_w_buffer( img )
-                # get the largest detection
-                largest_det = None
-                for _,_,tlbr in dets:
-                    if largest_det is None:
-                        largest_det = tlbr
-                    else:
-                        detarea = (tlbr[3]-tlbr[1]) * (tlbr[2]-tlbr[0])
-                        ldarea = (largest_det[3]-largest_det[1]) * (largest_det[2]-largest_det[0])
-                        if detarea > ldarea:
-                            largest_det = tlbr
-
-                if largest_det is not None:
-                    # crop image
-                    min_x = largest_det[1]
-                    min_y = largest_det[0]
-                    max_x = largest_det[3]
-                    max_y = largest_det[2]
-
-                    # img_show = img[min_y:max_y, min_x:max_x]
-                    img_show = img.crop( (min_x, min_y, max_x, max_y) )
-                else:
-                    pose_failcount +=1
-                    # copy the image as per usual
-                    img_show = img
+                img_show = od.crop_largest_person( img )
                 img_show.save( target_fp, os.path.splitext(target_fp)[1][1:].upper() )
-            pose_total = len(list(os.listdir(pose_dir)))
-            print('for pose {}: {} / {}'.format(pose, pose_failcount, pose_total))
+                # dets = od.detect_persons( img )
+                # # get the largest detection
+                # largest_det = None
+                # for _,_,tlbr in dets:
+                #     if largest_det is None:
+                #         largest_det = tlbr
+                #     else:
+                #         detarea = (tlbr[3]-tlbr[1]) * (tlbr[2]-tlbr[0])
+                #         ldarea = (largest_det[3]-largest_det[1]) * (largest_det[2]-largest_det[0])
+                #         if detarea > ldarea:
+                #             largest_det = tlbr
+
+                # if largest_det is not None:
+                #     # crop image
+                #     min_x = largest_det[1]
+                #     min_y = largest_det[0]
+                #     max_x = largest_det[3]
+                #     max_y = largest_det[2]
+
+                #     # img_show = img[min_y:max_y, min_x:max_x]
+                #     img_show = img.crop( (min_x, min_y, max_x, max_y) )
+                # else:
+                #     pose_failcount +=1
+                #     # copy the image as per usual
+                #     img_show = img
+                # img_show.save( target_fp, os.path.splitext(target_fp)[1][1:].upper() )
+            # pose_total = len(list(os.listdir(pose_dir)))
+            # print('for pose {}: {} / {}'.format(pose, pose_failcount, pose_total))
 
                 # print(dets)
                 # cv2.imshow('', img_show)

@@ -3,6 +3,8 @@ import os
 import numpy as np
 
 from pprint import pprint
+from PIL import Image
+from kerasyolo.yolo import YOLO
 
 from keras.models import Model, load_model
 from keras.preprocessing.image import ImageDataGenerator
@@ -25,8 +27,8 @@ from keras.applications.xception import preprocess_input as xcep_preproc
 from utils.preprocess_finder import preprocess_finder
 
 finder = preprocess_finder(verbose=False)
-# pp_dict = {'resnet152': res_preproc, 'resnet50':res50_preproc, 'xception':xcep_preproc, 'inception_v3':inv3_preproc, 'inception_resnet_v2':inresv2_preproc}
-# pp_dict = {'resnet152': res_preproc, 'resnet50':res50_preproc, 'xception': lambda x: x/255., 'inception_v3':lambda x: x/255., 'inception_resnet_v2':lambda x: x/255.}
+od_threshold = 0.3
+od = YOLO(threshold=od_threshold)
 
 def num_jpgs_nested_in_folder( folder ):
     total_imgs = 0
@@ -96,14 +98,13 @@ def eval_softmax_vectors(test_folder, preds):
 
 def ensemble_models(models_path, test_folder, num_classes):
     # models_path = '/home/angeugn/Workspace/aicamp/models/best_models'
-    # test_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/test'
+    # test_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/test'
     class_labels = sorted( list(os.listdir(test_folder)) )
 
     target_size = (224,224)
     total_testimgs = num_jpgs_nested_in_folder( test_folder )
 
     all_preds = np.zeros( (total_testimgs, num_classes) )
-    # model = load_model(model_path, custom_objects={'relu6':relu6, 'tf':tf})
     model_list = list(os.listdir(models_path))
     for model_ in model_list:
         if not model_.endswith('.hdf5'):
@@ -111,7 +112,7 @@ def ensemble_models(models_path, test_folder, num_classes):
         model_path = os.path.join( models_path, model_ )
         model = load_model(model_path)
         context = model_[:model_.rfind('_')]
-        print('Testing model: {}'.format(model_))
+        print('Running model {} with context {}'.format(model_, context))
 
         i = 0
 
@@ -121,7 +122,10 @@ def ensemble_models(models_path, test_folder, num_classes):
             sorted_imgs = sorted(list(os.listdir( pose_folder )))
             for im in sorted_imgs:
                 img_path = os.path.join( pose_folder, im )
-                img = image.load_img(img_path, target_size=target_size)
+                # img = image.load_img(img_path, target_size=target_size)
+                img = Image.open( img_path )
+                img = od.crop_largest_person( img )
+                img = img.resize( target_size, Image.NEAREST )
                 x = image.img_to_array(img)
                 x = np.expand_dims(x, axis=0)
                 x = finder(context)(x)
@@ -131,11 +135,14 @@ def ensemble_models(models_path, test_folder, num_classes):
 
         del model
 
+    print('evaluating the ensemble.')
+
     eval_softmax_vectors(test_folder, all_preds)
 
 def eval_models_singly(models_path, test_folder, num_classes):
     # models_path = '/home/angeugn/Workspace/aicamp/models/test_model'
-    # test_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/test'
+    # test_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/test'
+    # temp_target_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/crops'
     class_labels = sorted( list(os.listdir(test_folder)) )
 
     target_size = (224,224)
@@ -149,7 +156,7 @@ def eval_models_singly(models_path, test_folder, num_classes):
         model_path = os.path.join( models_path, model_ )
         model = load_model(model_path)
         context = model_[:model_.rfind('_')]
-        print('Testing model: {}'.format(model_))
+        print('Testing model {} with context {}'.format(model_, context))
 
         i = 0
 
@@ -157,18 +164,28 @@ def eval_models_singly(models_path, test_folder, num_classes):
         for cl in class_labels:
             print('--> class: {}'.format(cl))
             pose_folder = os.path.join( test_folder, cl )
+            # tgt_pose_folder = os.path.join( temp_target_folder, cl )
+            # if not os.path.exists( tgt_pose_folder ):
+            #     os.makedirs( tgt_pose_folder )
             sorted_imgs = sorted(list(os.listdir( pose_folder )))
             for im in sorted_imgs:
                 img_path = os.path.join( pose_folder, im )
-                img = image.load_img(img_path, target_size=target_size)
+                # tgt_crop_path = os.path.join( tgt_pose_folder, im )
+                # img = image.load_img(img_path, target_size=target_size)
+                img = Image.open( img_path )
+                img = od.crop_largest_person( img )
+                img = img.resize( target_size, Image.NEAREST )
+
+                # img.save( tgt_crop_path, os.path.splitext(tgt_crop_path)[1][1:].upper() )
+
                 x = image.img_to_array(img)
                 x = np.expand_dims(x, axis=0)
                 x = finder(context)(x)
                 preds = model.predict( x )
                 all_preds[i] += preds[0]
                 i+=1
+        # exit()
         eval_softmax_vectors(test_folder, all_preds)
-
         del model
 
 
@@ -176,5 +193,7 @@ def eval_models_singly(models_path, test_folder, num_classes):
 if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
     num_classes = 16
-    eval_models_singly(models_path, test_folder, num_classes)
-    # ensemble_models(models_path, test_folder, num_classes)
+    models_path = '/home/angeugn/Workspace/aicamp/models/test_model'
+    test_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/test'
+    # eval_models_singly(models_path, test_folder, num_classes)
+    ensemble_models(models_path, test_folder, num_classes)

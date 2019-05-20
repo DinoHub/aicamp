@@ -125,7 +125,7 @@ def get_inception_resnet_v2(num_classes, verbose=True):
     base_model = InceptionResNetV2(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation='relu')(x)
+    # x = Dense(1024, activation='relu')(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
@@ -134,14 +134,14 @@ def get_inception_resnet_v2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 16, (224, 224), model
+    return 32, (224, 224), model
 
 def get_inception_v3(num_classes, verbose=True):
     from keras.applications.inception_v3 import InceptionV3
     base_model = InceptionV3(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation='relu')(x)
+    # x = Dense(1024, activation='relu')(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
@@ -150,7 +150,7 @@ def get_inception_v3(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 16, (224, 224), model
+    return 32, (224, 224), model
 
 def get_xception(num_classes, verbose=True):
     from keras.applications.xception import Xception
@@ -158,7 +158,7 @@ def get_xception(num_classes, verbose=True):
     base_model = Xception(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation='relu')(x)
+    # x = Dense(1024, activation='relu')(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
@@ -167,7 +167,7 @@ def get_xception(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 16, (224, 224), model
+    return 32, (224, 224), model
 
 def get_resnet152_v2(num_classes, verbose=True):
     # import keras
@@ -178,7 +178,7 @@ def get_resnet152_v2(num_classes, verbose=True):
     base_model = ResNet152V2(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation='relu')(x)
+    # x = Dense(1024, activation='relu')(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
@@ -187,7 +187,7 @@ def get_resnet152_v2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 16, (224, 224), model
+    return 32, (224, 224), model
 
 def get_resnet101_v2(num_classes, verbose=True):
     # import keras
@@ -198,7 +198,7 @@ def get_resnet101_v2(num_classes, verbose=True):
     base_model = ResNet101V2(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation='relu')(x)
+    # x = Dense(1024, activation='relu')(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
@@ -207,7 +207,7 @@ def get_resnet101_v2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 16, (224, 224), model
+    return 32, (224, 224), model
 
 def get_resnet152(num_classes, verbose=True):
     from kerasapps.keras_applications.resnet import ResNet152
@@ -215,7 +215,7 @@ def get_resnet152(num_classes, verbose=True):
     base_model = ResNet152(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation='relu')(x)
+    # x = Dense(1024, activation='relu')(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
@@ -224,15 +224,17 @@ def get_resnet152(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 16, (224, 224), model
+    return 32, (224, 224), model
 
+# Native preprocessing
+# No progressive scaling
 def get_resnet50(num_classes, verbose=True):
     from keras.applications.resnet50 import ResNet50
     # base_model = ResNet50(input_shape=(224,224,3), weights='imagenet', include_top=False)
     base_model = ResNet50(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation='relu')(x)
+    # x = Dense(1024, activation='relu')(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
@@ -241,7 +243,7 @@ def get_resnet50(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 16, (224, 224), model
+    return 32, (224, 224), model
 
 def get_mobilenet_v2(num_classes, verbose=True):
     from keras.applications.mobilenet_v2 import MobileNetV2
@@ -249,7 +251,7 @@ def get_mobilenet_v2(num_classes, verbose=True):
     base_model = MobileNetV2(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation='relu')(x)
+    # x = Dense(1024, activation='relu')(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
@@ -258,7 +260,7 @@ def get_mobilenet_v2(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 16, (224, 224), model
+    return 32, (224, 224), model
 
 def get_resnet101(num_classes, verbose=True):
     from kerasapps.keras_applications.resnet import ResNet101
@@ -266,7 +268,7 @@ def get_resnet101(num_classes, verbose=True):
     base_model = ResNet101(weights='imagenet', include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation='relu')(x)
+    # x = Dense(1024, activation='relu')(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
@@ -275,26 +277,26 @@ def get_resnet101(num_classes, verbose=True):
                   metrics=['accuracy'])
     if verbose:
         model.summary()
-    return 16, (224, 224), model
+    return 32, (224, 224), model
 
 def get_model(context, num_classes, verbose=True):
-    if context == 'inception_resnet_v2':
+    if context.startswith('inception_resnet_v2'):
         return get_inception_resnet_v2( num_classes, verbose )
-    elif context == 'inception_v3':
+    elif context.startswith('inception_v3'):
         return get_inception_v3( num_classes, verbose )
-    elif context == 'xception':
+    elif context.startswith('xception'):
         return get_xception( num_classes, verbose )
-    elif context == 'resnet152_v2':
+    elif context.startswith('resnet152_v2'):
         return get_resnet152_v2(num_classes, verbose)
-    elif context == 'resnet101_v2':
+    elif context.startswith('resnet101_v2'):
         return get_resnet101_v2(num_classes, verbose)
-    elif context == 'resnet152':
+    elif context.startswith('resnet152'):
         return get_resnet152(num_classes, verbose)
-    elif context == 'resnet101':
+    elif context.startswith('resnet101'):
         return get_resnet101(num_classes, verbose)
-    elif context == 'resnet50':
+    elif context.startswith('resnet50'):
         return get_resnet50(num_classes, verbose)
-    elif context == 'mobilenet_v2':
+    elif context.startswith('mobilenet_v2'):
         return get_mobilenet_v2(num_classes, verbose)
 
 def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, kwargs, bs, train_folder, val_folder, n_epochs):
@@ -347,9 +349,13 @@ def train_from_scratch(train_folder, val_folder, contexts):
 
         # progressive scaling
         scales = [(75,75), (150,150), (224,224)]
-        epochses = [50, 50, 200]
+        epochses = [10, 10, 200]
+        # scales = [(224,224)]
+        # epochses = [200]
         for scale, epochs in zip(scales, epochses):
             train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
+
+        model.save('models/{}/{}_last.hdf5'.format(context,context))
 
         del model
 
@@ -366,11 +372,11 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
     # os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
-    train_folder = 'data/TIL2019_v0.1/split/train'
-    val_folder = 'data/TIL2019_v0.1/split/val'
+    train_folder = 'data/TIL2019_v0.1_yoloed/split/train'
+    val_folder = 'data/TIL2019_v0.1_yoloed/split/val'
 
-    contexts = ['resnet50', 'resnet152', 'resnet101', 'xception', 'inception_resnet_v2', 'inception_v3', 'resnet152_v2', 'resnet101_v2']
-    # contexts = ['resnet152', 'resnet101']
-    # contexts = ['resnet50', 'xception']
+    # contexts = ['resnet50', 'resnet152', 'resnet101', 'xception', 'inception_resnet_v2', 'inception_v3', 'resnet152_v2', 'resnet101_v2']
+    contexts = ['resnet152_v2', 'resnet101_v2']
+    # contexts = ['inception_resnet_v2', 'inception_resnet_v2_255', 'inception_v3', 'inception_v3_255', 'xception', 'xception_255']
     train_from_scratch(train_folder, val_folder, contexts)
     # resume_train(train_folder, val_folder, 'inception_v3', 'models/inception_v3/inception_v3_acc.hdf5', (224,224), 100, 64)

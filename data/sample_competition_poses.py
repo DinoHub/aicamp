@@ -150,8 +150,8 @@ def sample_validation_set():
             idx += 1
 
 def generate_train_val_split():
-    source_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/train'
-    target_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/split'
+    source_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/train'
+    target_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/split'
     ratio = 0.15
 
     if os.path.exists( target_folder ):
