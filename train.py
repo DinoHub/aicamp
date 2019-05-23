@@ -360,7 +360,7 @@ def train_from_scratch(source_folder, target_folder, contexts, save_at_end=False
         # scales = [(75,75), (150,150), (224,224)]
         # epochses = [10, 10, 200]
         scales = [(224,224)]
-        epochses = [200]
+        epochses = [120]
         for scale, epochs in zip(scales, epochses):
             train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
 
@@ -379,7 +379,7 @@ def resume_train(train_folder, val_folder, context, model_path, target_size, epo
     train_at_scale(model, target_size, csvLogger, valLossCP, valAccCP, tbCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
 
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"]="0"
+    os.environ["CUDA_VISIBLE_DEVICES"]="1"
     # os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
     base_data_folder = 'data/TIL2019_v0.1'
@@ -394,6 +394,7 @@ if __name__ == '__main__':
     # contexts = ['resnet50', 'resnet152', 'resnet101', 'xception', 'inception_resnet_v2', 'inception_v3', 'resnet152_v2', 'resnet101_v2']
     # contexts = ['resnet152_v2', 'resnet101_v2']
     # contexts = ['inception_resnet_v2', 'inception_resnet_v2_255', 'inception_v3', 'inception_v3_255', 'xception', 'xception_255']
-    contexts = ['resnet50_1', 'resnet50_2', 'resnet50_3']
+    # contexts = ['resnet50_1', 'resnet50_2', 'resnet50_3']
+    contexts = ['xception_{}'.format(idx) for idx in range(7)]
     train_from_scratch(source_folder, target_folder, contexts)
     # resume_train(train_folder, val_folder, 'inception_v3', 'models/inception_v3/inception_v3_acc.hdf5', (224,224), 100, 64)
