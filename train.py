@@ -337,8 +337,7 @@ def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, kwa
             validation_steps=validation_generator.samples // bs,
             callbacks=[csvLogger, valLossCP, valAccCP, tbCallback])
 
-def train_from_scratch(source_folder, target_folder, contexts, save_at_end=False):
-    n_classes = 16
+def train_from_scratch(source_folder, target_folder, contexts, num_classes, save_at_end=False):
     finder = preprocess_finder()
     train_folder = os.path.join(target_folder, 'train')
     val_folder = os.path.join(target_folder, 'val')
@@ -349,7 +348,7 @@ def train_from_scratch(source_folder, target_folder, contexts, save_at_end=False
         if not os.path.exists( 'models/{}'.format(context) ):
             os.makedirs( 'models/{}'.format(context) )
 
-        bs, target_size, model = get_model(context, n_classes)
+        bs, target_size, model = get_model(context, num_classes)
 
         csvLogger = CSVLogger('logs/{}.log'.format(context))
         valLossCP = ModelCheckpoint('models/{}/{}_loss.hdf5'.format(context, context), save_best_only=True)
@@ -360,7 +359,7 @@ def train_from_scratch(source_folder, target_folder, contexts, save_at_end=False
         # scales = [(75,75), (150,150), (224,224)]
         # epochses = [10, 10, 200]
         scales = [(224,224)]
-        epochses = [120]
+        epochses = [100]
         for scale, epochs in zip(scales, epochses):
             train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
 
@@ -378,11 +377,17 @@ def resume_train(train_folder, val_folder, context, model_path, target_size, epo
     model = load_model(model_path)
     train_at_scale(model, target_size, csvLogger, valLossCP, valAccCP, tbCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
 
+def get_num_classes(base_data_folder):
+    train_folder = os.path.join( base_data_folder, 'train' )
+    return len( list( os.listdir( train_folder ) ) )
+
 if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"]="1"
     # os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
-    base_data_folder = 'data/TIL2019_v0.1'
+    base_data_folder = 'data/TIL2019_v0.2/original'
+
+    num_classes = get_num_classes(base_data_folder)
 
     # This is the folder from which we draw all train/val splits
     source_folder = os.path.join( base_data_folder, 'train' )
@@ -395,6 +400,7 @@ if __name__ == '__main__':
     # contexts = ['resnet152_v2', 'resnet101_v2']
     # contexts = ['inception_resnet_v2', 'inception_resnet_v2_255', 'inception_v3', 'inception_v3_255', 'xception', 'xception_255']
     # contexts = ['resnet50_1', 'resnet50_2', 'resnet50_3']
-    contexts = ['xception_{}'.format(idx) for idx in range(7)]
-    train_from_scratch(source_folder, target_folder, contexts)
+    contexts = ['xception_og_{}'.format(idx) for idx in range(10)]
+    contexts += ['resnet50_og_{}'.format(idx) for idx in range(10)]
+    train_from_scratch(source_folder, target_folder, contexts, num_classes)
     # resume_train(train_folder, val_folder, 'inception_v3', 'models/inception_v3/inception_v3_acc.hdf5', (224,224), 100, 64)
