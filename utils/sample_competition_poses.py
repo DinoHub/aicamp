@@ -197,11 +197,63 @@ def generate_train_val_split(source_folder, target_folder, ratio=0.15):
                 shutil.copy( src_fp, tgt_fp )
             idx += 1
 
+def split_into_og_curveball( tilfolder, target_folder ):
+    from distutils.dir_util import copy_tree
+    assert os.path.exists(tilfolder), 'source folder does not exist'
+    # Assumes that the folder has train and test folders
+    curveball_poses = ['Spiderman', 'ChestBump', 'EaglePose', 'HighKneel', 'LeopardCrawl']
+
+    curveball_parent = os.path.join(target_folder, 'curveball')
+    curveball_train = os.path.join(curveball_parent, 'train')
+    curveball_test = os.path.join(curveball_parent, 'test')
+    original_parent = os.path.join(target_folder, 'original')
+    original_train = os.path.join(original_parent, 'train')
+    original_test = os.path.join(original_parent, 'test')
+
+    if not os.path.exists( curveball_train ):
+        os.makedirs( curveball_train )
+    if not os.path.exists( curveball_test ):
+        os.makedirs( curveball_test )
+    if not os.path.exists( original_train ):
+        os.makedirs( original_train )
+    if not os.path.exists( original_test ):
+        os.makedirs( original_test )
+
+    source_train = os.path.join( tilfolder, 'train' )
+    original_poses = [pose for pose in os.listdir(source_train) if pose not in curveball_poses]
+    for pose in original_poses:
+        source_pose_path = os.path.join(source_train, pose)
+        target_pose_path = os.path.join(original_train, pose)
+        copy_tree( source_pose_path, target_pose_path )
+    for pose in curveball_poses:
+        source_pose_path = os.path.join(source_train, pose)
+        target_pose_path = os.path.join(curveball_train, pose)
+        copy_tree( source_pose_path, target_pose_path )
+
+    source_test = os.path.join( tilfolder, 'test' )
+    for pose in original_poses:
+        source_pose_path = os.path.join(source_test, pose)
+        target_pose_path = os.path.join(original_test, pose)
+        copy_tree( source_pose_path, target_pose_path )
+    for pose in curveball_poses:
+        source_pose_path = os.path.join(source_test, pose)
+        target_pose_path = os.path.join(curveball_test, pose)
+        copy_tree( source_pose_path, target_pose_path )
+
+
+
+
 if __name__ == '__main__':
-    source_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/train'
-    target_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/split'
-    ratio = 0.15
-    generate_train_val_split(source_folder, target_folder, ratio)
+    source_folder = 'TIL2019_v0.1'
+    target_folder = 'TIL2019_v0.2'
+
+    split_into_og_curveball( source_folder, target_folder )
+
+
+    # source_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/train'
+    # target_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/split'
+    # ratio = 0.15
+    # generate_train_val_split(source_folder, target_folder, ratio)
     # sample_aicamp()
     # sample_validation_set()
     # sample_a_competition()
