@@ -24,9 +24,9 @@ from keras.applications.inception_v3 import preprocess_input as inv3_preproc
 from keras.applications.inception_resnet_v2 import preprocess_input as inresv2_preproc
 from keras.applications.xception import preprocess_input as xcep_preproc
 
-from utils.preprocess_finder import preprocess_finder
+from utils.preprocess_finder import finder
 
-finder = preprocess_finder(verbose=False)
+# finder = preprocess_finder(verbose=False)
 od_threshold = 0.3
 od = YOLO(threshold=od_threshold)
 
@@ -128,7 +128,7 @@ def ensemble_models(models_path, test_folder, num_classes, save_preds=None):
                 img = img.resize( target_size, Image.NEAREST )
                 x = image.img_to_array(img)
                 x = np.expand_dims(x, axis=0)
-                x = finder(context)(x)
+                x = finder(context, verbose=False)(x)
                 preds = model.predict( x )
                 all_preds[i] += preds[0]
                 i+=1

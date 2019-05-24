@@ -22,9 +22,9 @@ from keras.applications.inception_v3 import preprocess_input as inv3_preproc
 from keras.applications.inception_resnet_v2 import preprocess_input as inresv2_preproc
 from keras.applications.xception import preprocess_input as xcep_preproc
 
-from utils.preprocess_finder import preprocess_finder
+from utils.preprocess_finder import finder
 
-finder = preprocess_finder(verbose=False)
+# finder = preprocess_finder(verbose=False)
 # pp_dict = {'resnet152': res_preproc, 'resnet50':res50_preproc, 'xception':xcep_preproc, 'inception_v3':inv3_preproc, 'inception_resnet_v2':inresv2_preproc}
 # pp_dict = {'resnet152': res_preproc, 'resnet50':res50_preproc, 'xception': lambda x: x/255., 'inception_v3':lambda x: x/255., 'inception_resnet_v2':lambda x: x/255.}
 
@@ -93,7 +93,6 @@ def eval_softmax_vectors(test_folder, preds):
     print('score: {}'.format(score))
     print('accuracy: {0:.6f}'.format( score / i ))
 
-
 def ensemble_models(models_path, test_folder, num_classes, save_preds=None):
     # models_path = '/home/angeugn/Workspace/aicamp/models/best_models'
     # test_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed/test'
@@ -124,7 +123,7 @@ def ensemble_models(models_path, test_folder, num_classes, save_preds=None):
                 img = image.load_img(img_path, target_size=target_size)
                 x = image.img_to_array(img)
                 x = np.expand_dims(x, axis=0)
-                x = finder(context)(x)
+                x = finder(context, verbose=False)(x)
                 preds = model.predict( x )
                 all_preds[i] += preds[0]
                 i+=1
@@ -166,20 +165,25 @@ def eval_models_singly(models_path, test_folder, num_classes):
                 img = image.load_img(img_path, target_size=target_size)
                 x = image.img_to_array(img)
                 x = np.expand_dims(x, axis=0)
-                x = finder(context)(x)
+                x = finder(context, verbose=True)(x)
                 preds = model.predict( x )
                 all_preds[i] += preds[0]
                 i+=1
+            print(all_preds)
         eval_softmax_vectors(test_folder, all_preds)
-
         del model
+        exit()
 
+def conf_mat():
+    from sklearn.metrics import classification_report, confusion_matrix
+    cm = confusion_matrix()
 
 
 if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
     num_classes = 16
-    models_path = '/home/angeugn/Workspace/aicamp/models/best_models'
-    test_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1/test'
+    # models_path = '/home/dh/Workspace/aicamp/models/resnet101_v2'
+    models_path = '/home/dh/Workspace/aicamp/models/xception'
+    test_folder = '/media/dh/Data/AI_Camp/TIL2019_v0.1/test'
     eval_models_singly(models_path, test_folder, num_classes)
     # ensemble_models(models_path, test_folder, num_classes)

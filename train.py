@@ -11,7 +11,7 @@ from keras.preprocessing.image import ImageDataGenerator
 
 from keras.callbacks import ModelCheckpoint, CSVLogger, TensorBoard
 
-from utils.preprocess_finder import preprocess_finder
+from utils.preprocess_finder import finder
 from data.sample_competition_poses import generate_train_val_split
 # from mobilenetv2 import mobilenetv2
 
@@ -339,7 +339,7 @@ def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, kwa
 
 def train_from_scratch(source_folder, target_folder, contexts, save_at_end=False):
     n_classes = 16
-    finder = preprocess_finder()
+    # finder = preprocess_finder()
     train_folder = os.path.join(target_folder, 'train')
     val_folder = os.path.join(target_folder, 'val')
     for context in contexts:
@@ -370,7 +370,7 @@ def train_from_scratch(source_folder, target_folder, contexts, save_at_end=False
         del model
 
 def resume_train(train_folder, val_folder, context, model_path, target_size, epochs, bs):
-    finder = preprocess_finder()
+    # finder = preprocess_finder()
     csvLogger = CSVLogger('logs/{}.log'.format(context))
     valLossCP = ModelCheckpoint('models/{}/{}_loss.hdf5'.format(context, context), save_best_only=True)
     valAccCP = ModelCheckpoint('models/{}/{}_acc.hdf5'.format(context, context), monitor='val_acc', save_best_only=True)
