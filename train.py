@@ -12,7 +12,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, CSVLogger, TensorBoard
 
 from utils.preprocess_finder import finder
-from data.sample_competition_poses import generate_train_val_split
+from utils.sample_competition_poses import generate_train_val_split
 # from mobilenetv2 import mobilenetv2
 
 # def preprocess_finder():
