@@ -337,7 +337,7 @@ def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, kwa
             validation_steps=validation_generator.samples // bs,
             callbacks=[csvLogger, valLossCP, valAccCP, tbCallback])
 
-def train_from_scratch(source_folder, target_folder, contexts, num_classes, save_at_end=False):
+def train_from_scratch(source_folder, target_folder, contexts, num_classes, save_at_end=False, ngpus=1):
     # finder = preprocess_finder()
     train_folder = os.path.join(target_folder, 'train')
     val_folder = os.path.join(target_folder, 'val')
@@ -348,8 +348,12 @@ def train_from_scratch(source_folder, target_folder, contexts, num_classes, save
         if not os.path.exists( 'models/{}'.format(context) ):
             os.makedirs( 'models/{}'.format(context) )
 
-        bs, target_size, model = get_model(context, num_classes)
-
+        bs, target_size, model = get_model(context, num_classes, ngpus=ngpus)
+        if ngpus > 1:
+            model = multi_gpu_model(model, gpus=ngpus, cpu_relocation=True)
+        model.compile(optimizer='adam',
+                      loss='categorical_crossentropy',
+                      metrics=['accuracy'])
         csvLogger = CSVLogger('logs/{}.log'.format(context))
         valLossCP = ModelCheckpoint('models/{}/{}_loss.hdf5'.format(context, context), save_best_only=True)
         valAccCP = ModelCheckpoint('models/{}/{}_acc.hdf5'.format(context, context), monitor='val_acc', save_best_only=True)
@@ -381,9 +385,18 @@ def get_num_classes(base_data_folder):
     train_folder = os.path.join( base_data_folder, 'train' )
     return len( list( os.listdir( train_folder ) ) )
 
+def get_available_gpus():
+    from tensorflow.python.client import device_lib
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos if x.device_type == 'GPU']
+
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"]="1"
-    # os.environ["CUDA_VISIBLE_DEVICES"]="1"
+    ## Uncomment to use specific gpu:
+    # os.environ["CUDA_VISIBLE_DEVICES"]="0"
+    gpus = get_available_gpus()
+    ngpus = len(gpus)
+    print('Num of GPUs visible to me: {}'.format(ngpus))
+    print(gpus)
 
     base_data_folder = 'data/TIL2019_v0.2/original'
 
@@ -402,5 +415,5 @@ if __name__ == '__main__':
     # contexts = ['resnet50_1', 'resnet50_2', 'resnet50_3']
     contexts = ['xception_og_{}'.format(idx) for idx in range(10)]
     contexts += ['resnet50_og_{}'.format(idx) for idx in range(10)]
-    train_from_scratch(source_folder, target_folder, contexts, num_classes)
+    train_from_scratch(source_folder, target_folder, contexts, num_classes, ngpus=ngpus)
     # resume_train(train_folder, val_folder, 'inception_v3', 'models/inception_v3/inception_v3_acc.hdf5', (224,224), 100, 64)
