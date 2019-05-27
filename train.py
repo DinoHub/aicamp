@@ -64,9 +64,9 @@ def get_model_0(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
 
     model = Model(inputs=input_img, outputs=predictions)
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 256, (224, 224), model
@@ -113,9 +113,9 @@ def get_model_1(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
 
     model = Model(inputs=input_img, outputs=predictions)
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 64, (224, 224), model
@@ -130,9 +130,9 @@ def get_inception_resnet_v2(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -147,9 +147,9 @@ def get_inception_v3(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -166,9 +166,9 @@ def get_xception(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -186,9 +186,9 @@ def get_resnet152_v2(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -206,9 +206,9 @@ def get_resnet101_v2(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -226,9 +226,9 @@ def get_resnet152(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -245,9 +245,9 @@ def get_resnet50(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -262,9 +262,9 @@ def get_mobilenet_v2(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -279,9 +279,9 @@ def get_resnet101(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
