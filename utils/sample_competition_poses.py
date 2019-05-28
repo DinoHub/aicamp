@@ -248,11 +248,14 @@ def split_into_og_curveball( tilfolder, target_folder ):
         target_pose_path = os.path.join(curveball_test, pose)
         copy_tree( source_pose_path, target_pose_path )
 
-def sample_pose_folders( source_folder, target_parent_folder, sample_name, pose_list, mgmt_dict, target_ratio, create_pose_folders=True, keep_img_names=True ):
+def sample_pose_folders( source_folder, target_parent_folder, sample_name, pose_list, mgmt_dict, target_ratio, create_pose_folders=True, keep_pids=True ):
     sample_folder = os.path.join( target_parent_folder, sample_name )
-    curr_idx = 0
+    
+    idxes = [i for i in range(1000000)]
+    random.shuffle( idxes )
+
+    labels = []
     for pose in pose_list:
-        print(pose)
         target_pose_folder = os.path.join( sample_folder, pose ) if create_pose_folders else sample_folder
         if not os.path.exists( target_pose_folder ):
             os.makedirs( target_pose_folder )
@@ -271,13 +274,14 @@ def sample_pose_folders( source_folder, target_parent_folder, sample_name, pose_
             pid_img_paths = pose_dict[pid]
             for pid_img in pid_img_paths:
                 full_img_path = os.path.join( pose_path, pid_img )
-                target_img_path = os.path.join( target_pose_folder, pid_img ) if keep_img_names else os.path.join( target_pose_folder, '{0:06}.png'.format(curr_idx) )
+                target_img_path = os.path.join( target_pose_folder, ( '{0:06}_'.format(idxes.pop(0)) + '{}.png'.format(pid) ) if keep_pids else '{0:06}.png'.format(idxes.pop(0)) )
                 shutil.copyfile( full_img_path, target_img_path )
-                curr_idx += 1
+                labels.append( (target_img_path, pose) )
 
                 # print(full_img_path)
             total_picked += len( pid_img_paths )
             del pose_dict[pid]
+    return labels
 
 def generate_real_competition( poses_folder, target_folder ):
     assert os.path.exists(poses_folder), 'source pose folder does not exist'
@@ -294,8 +298,10 @@ def generate_real_competition( poses_folder, target_folder ):
         pose_dict = groupby_pids_2( pose_dirp )
         overall_dict[pose] = (pose_dict, num_pose_imgs)
 
+    labels = {}
+
     # train
-    sample_pose_folders( source_folder=poses_folder,
+    labels['0_train'] = sample_pose_folders( source_folder=poses_folder,
                          target_parent_folder=target_folder, 
                          sample_name='0_train',
                          pose_list=original_poses,
@@ -304,7 +310,7 @@ def generate_real_competition( poses_folder, target_folder ):
                          create_pose_folders=True )
 
     # leaderboard1
-    sample_pose_folders( source_folder=poses_folder,
+    labels['1_leaderboard1'] = sample_pose_folders( source_folder=poses_folder,
                          target_parent_folder=target_folder, 
                          sample_name='1_leaderboard1',
                          pose_list=original_poses,
@@ -313,7 +319,7 @@ def generate_real_competition( poses_folder, target_folder ):
                          create_pose_folders=False )
 
     # curveball
-    sample_pose_folders( source_folder=poses_folder,
+    labels['2_curveball'] = sample_pose_folders( source_folder=poses_folder,
                          target_parent_folder=target_folder, 
                          sample_name='2_curveball',
                          pose_list=curveball_poses,
@@ -322,7 +328,7 @@ def generate_real_competition( poses_folder, target_folder ):
                          create_pose_folders=True )
 
     # leaderboard2
-    sample_pose_folders( source_folder=poses_folder,
+    labels['3_leaderboard2'] = sample_pose_folders( source_folder=poses_folder,
                          target_parent_folder=target_folder, 
                          sample_name='3_leaderboard2',
                          pose_list=all_poses,
@@ -331,14 +337,20 @@ def generate_real_competition( poses_folder, target_folder ):
                          create_pose_folders=False )
 
     # finaltestset
-    sample_pose_folders( source_folder=poses_folder,
+    labels['4_finaltestset'] = sample_pose_folders( source_folder=poses_folder,
                          target_parent_folder=target_folder, 
                          sample_name='4_finaltestset',
                          pose_list=all_poses,
                          mgmt_dict=overall_dict,
                          target_ratio=None,
                          create_pose_folders=False,
-                         keep_img_names=False )
+                         keep_pids=False )
+
+    import json
+    labels_path = os.path.join( target_folder, 'labels.json' )
+    with open(labels_path, 'w') as label_j:
+        json.dump( labels, label_j )
+
 
 def annonimize_poses( poses_folder ):
     for pose in os.listdir( poses_folder ):

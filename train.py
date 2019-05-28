@@ -329,7 +329,7 @@ def scheduler(epoch_idx):
         return 0.01
     elif epoch_idx < 10:
         return 0.001
-    return max( 1e-6, 0.0001 - epoch_idx * 1e-6 )
+    return max( 8e-5, 0.0001 - epoch_idx * 1e-6 )
 
 def train_from_scratch(source_folder, target_folder, contexts, num_classes, save_at_end=False, ngpus=1):
     # finder = preprocess_finder()
@@ -337,7 +337,7 @@ def train_from_scratch(source_folder, target_folder, contexts, num_classes, save
     val_folder = os.path.join(target_folder, 'val')
     for context in contexts:
         # Each round, we train on a different split
-        generate_train_val_split(source_folder, target_folder)
+        generate_train_val_split(source_folder, target_folder, ratio=0.1)
 
         if not os.path.exists( 'models/{}'.format(context) ):
             os.makedirs( 'models/{}'.format(context) )
@@ -413,6 +413,6 @@ if __name__ == '__main__':
     # contexts = ['resnet50_1', 'resnet50_2', 'resnet50_3']
     # contexts = ['xception_og_{}'.format(idx) for idx in range(10)]
     # contexts += ['resnet50_og_{}'.format(idx) for idx in range(10)]
-    contexts = ['mobilenet_v2']
+    contexts = ['mobilenet_v2_1']
     train_from_scratch(source_folder, target_folder, contexts, num_classes, ngpus=ngpus)
     # resume_train(train_folder, val_folder, 'inception_v3', 'models/inception_v3/inception_v3_acc.hdf5', (224,224), 100, 64)
