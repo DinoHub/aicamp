@@ -17,34 +17,6 @@ from utils.preprocess_finder import finder
 from utils.sample_competition_poses import generate_train_val_split
 # from mobilenetv2 import mobilenetv2
 
-# def preprocess_finder():
-#     def finder(key):
-#         if key == 'resnet50':
-#             return keras.applications.resnet50.preprocess_input
-#         elif key == 'mobilenet_v2':
-#             return keras.applications.mobilenet_v2.preprocess_input
-#         elif key == 'inception_v3':
-#             return keras.applications.inception_v3.preprocess_input
-#         elif key == 'inception_resnet_v2':
-#             return keras.applications.inception_resnet_v2.preprocess_input
-#         elif key == 'xception':
-#             return keras.applications.xception.preprocess_input
-#         elif key.startswith('resnet') and key.endswith('_v2'):
-#             return kerasapps.keras_applications.resnet_v2.preprocess_input
-#         elif key.startswith('resnet'):
-#             return kerasapps.keras_applications.resnet.preprocess_input
-#         else:
-#             return lambda x: x / 255.
-
-#     return finder
-
-def scheduler(epoch_idx):
-    if epoch_idx < 3:
-        return 0.01
-    elif epoch_idx < 10:
-        return 0.001
-    return 0.0001
-
 def get_model_0(num_classes, verbose=True):
     input_img = Input(shape=(224, 224, 3))
 
@@ -351,6 +323,13 @@ def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, lrC
             validation_data=validation_generator,
             validation_steps=validation_generator.samples // bs,
             callbacks=all_callbacks)
+
+def scheduler(epoch_idx):
+    if epoch_idx < 3:
+        return 0.01
+    elif epoch_idx < 10:
+        return 0.001
+    return 0.0001
 
 def train_from_scratch(source_folder, target_folder, contexts, num_classes, save_at_end=False, ngpus=1):
     # finder = preprocess_finder()
