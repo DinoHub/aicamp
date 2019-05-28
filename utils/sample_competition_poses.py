@@ -248,11 +248,43 @@ def split_into_og_curveball( tilfolder, target_folder ):
         target_pose_path = os.path.join(curveball_test, pose)
         copy_tree( source_pose_path, target_pose_path )
 
+def sample_pose_folders( source_folder, target_parent_folder, sample_name, pose_list, mgmt_dict, target_ratio, create_pose_folders=True, keep_img_names=True ):
+    sample_folder = os.path.join( target_parent_folder, sample_name )
+    curr_idx = 0
+    for pose in pose_list:
+        print(pose)
+        target_pose_folder = os.path.join( sample_folder, pose ) if create_pose_folders else sample_folder
+        if not os.path.exists( target_pose_folder ):
+            os.makedirs( target_pose_folder )
+        pose_path = os.path.join( source_folder, pose )
+        pose_dict, full_count = mgmt_dict[pose]
+        shuff_list = list(pose_dict.keys())
+        # print(shuff_list)
+        random.shuffle( shuff_list )
+        # print(shuff_list)
+        quota = int(target_ratio * full_count) if target_ratio is not None else None
+        # print(quota)
+        total_picked = 0
+
+        while len(shuff_list) > 0 and (quota is None or total_picked < quota):
+            pid = shuff_list.pop(0)
+            pid_img_paths = pose_dict[pid]
+            for pid_img in pid_img_paths:
+                full_img_path = os.path.join( pose_path, pid_img )
+                target_img_path = os.path.join( target_pose_folder, pid_img ) if keep_img_names else os.path.join( target_pose_folder, '{0:06}.png'.format(curr_idx) )
+                shutil.copyfile( full_img_path, target_img_path )
+                curr_idx += 1
+
+                # print(full_img_path)
+            total_picked += len( pid_img_paths )
+            del pose_dict[pid]
+
 def generate_real_competition( poses_folder, target_folder ):
     assert os.path.exists(poses_folder), 'source pose folder does not exist'
-    curveball_poses = ['Spiderman', 'ChestBump', 'EaglePose', 'HighKneel', 'LeopardCrawl']
 
-    original_poses = [pose for pose in os.listdir(poses_folder) if pose not in curveball_poses]
+    all_poses = [pose for pose in os.listdir(poses_folder)]
+    curveball_poses = ['Spiderman', 'ChestBump', 'EaglePose', 'HighKneel', 'LeopardCrawl']
+    original_poses = [pose for pose in all_poses if pose not in curveball_poses]
 
     overall_dict = {}
     # construct a dictionary that maps pose: id: im_fp
@@ -262,91 +294,51 @@ def generate_real_competition( poses_folder, target_folder ):
         pose_dict = groupby_pids_2( pose_dirp )
         overall_dict[pose] = (pose_dict, num_pose_imgs)
 
+    # train
+    sample_pose_folders( source_folder=poses_folder,
+                         target_parent_folder=target_folder, 
+                         sample_name='0_train',
+                         pose_list=original_poses,
+                         mgmt_dict=overall_dict,
+                         target_ratio=0.25,
+                         create_pose_folders=True )
 
-    # split_scheme = [('train11', 0.15), ('test11', 0.15), ('train5', 60), ('test16', 60)]
+    # leaderboard1
+    sample_pose_folders( source_folder=poses_folder,
+                         target_parent_folder=target_folder, 
+                         sample_name='1_leaderboard1',
+                         pose_list=original_poses,
+                         mgmt_dict=overall_dict,
+                         target_ratio=0.15,
+                         create_pose_folders=False )
 
+    # curveball
+    sample_pose_folders( source_folder=poses_folder,
+                         target_parent_folder=target_folder, 
+                         sample_name='2_curveball',
+                         pose_list=curveball_poses,
+                         mgmt_dict=overall_dict,
+                         target_ratio=0.40,
+                         create_pose_folders=True )
 
-    # print('before')
-    # print(len(overall_dict['HandShake'][0]))
+    # leaderboard2
+    sample_pose_folders( source_folder=poses_folder,
+                         target_parent_folder=target_folder, 
+                         sample_name='3_leaderboard2',
+                         pose_list=all_poses,
+                         mgmt_dict=overall_dict,
+                         target_ratio=0.15,
+                         create_pose_folders=False )
 
-
-
-    # train11
-    train11_folder = os.path.join( target_folder, 'train11' )
-    for og_pose in original_poses:
-        print(og_pose)
-        target_pose_folder = os.path.join( train11_folder, og_pose )
-        if not os.path.exists( target_pose_folder ):
-            os.makedirs( target_pose_folder )
-        og_pose_path = os.path.join( poses_folder, og_pose )
-        og_pose_dict, count = overall_dict[og_pose]
-        shuff_list = list(og_pose_dict.keys())
-        # print(shuff_list)
-        random.shuffle( shuff_list )
-        # print(shuff_list)
-        quota = int(0.25 * count)
-        # print(quota)
-        total_picked = 0
-
-        while total_picked < quota:
-            pid = shuff_list.pop(0)
-            pid_img_paths = og_pose_dict[pid]
-            for pid_img in pid_img_paths:
-                full_img_path = os.path.join( og_pose_path, pid_img )
-                target_img_path = os.path.join( target_pose_folder, pid_img )
-                shutil.copyfile( full_img_path, target_img_path )
-
-                # print(full_img_path)
-            total_picked += len( pid_img_paths )
-            del og_pose_dict[pid]
-
-
-    # train5
-    train5_folder = os.path.join( target_folder, 'train5' )
-    for curve_pose in curveball_poses:
-        print(curve_pose)
-        target_pose_folder = os.path.join( train5_folder, curve_pose )
-        if not os.path.exists( target_pose_folder ):
-            os.makedirs( target_pose_folder )
-        curve_pose_path = os.path.join( poses_folder, curve_pose )
-        curve_pose_dict, count = overall_dict[curve_pose]
-        shuff_list = list(curve_pose_dict.keys())
-        # print(shuff_list)
-        random.shuffle( shuff_list )
-        # print(shuff_list)
-        quota = int(0.45 * count)
-        # print(quota)
-        total_picked = 0
-
-        while total_picked < quota:
-            pid = shuff_list.pop(0)
-            pid_img_paths = curve_pose_dict[pid]
-            for pid_img in pid_img_paths:
-                full_img_path = os.path.join( curve_pose_path, pid_img )
-                target_img_path = os.path.join( target_pose_folder, pid_img )
-                shutil.copyfile( full_img_path, target_img_path )
-
-                # print(full_img_path)
-            total_picked += len( pid_img_paths )
-            del curve_pose_dict[pid]
-
-
-
-        # print(og_pose_dict)
-
-    # print('after')
-    # print(len(overall_dict['HandShake'][0]))
-
-
-
-
-
-    # print(list(pose_dict.keys()))
-
-    # print(list(overall_dict.keys()))
-    # print( overall_dict['WarriorPose'] )
-    # print(curveball_poses)
-    # print(original_poses)
+    # finaltestset
+    sample_pose_folders( source_folder=poses_folder,
+                         target_parent_folder=target_folder, 
+                         sample_name='4_finaltestset',
+                         pose_list=all_poses,
+                         mgmt_dict=overall_dict,
+                         target_ratio=None,
+                         create_pose_folders=False,
+                         keep_img_names=False )
 
 def annonimize_poses( poses_folder ):
     for pose in os.listdir( poses_folder ):
@@ -360,8 +352,8 @@ def annonimize_poses( poses_folder ):
 
 
 if __name__ == '__main__':
-    source_folder = '/home/dh/Workspace/aicamp/data/P16SES'
-    target_folder = 'Test'
+    source_folder = '/home/angeugn/Workspace/aicamp/data/P16SES'
+    target_folder = 'TIL2019_v1.0'
 
     # annonimize_poses( source_folder )
 
