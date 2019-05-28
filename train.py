@@ -329,7 +329,7 @@ def scheduler(epoch_idx):
         return 0.01
     elif epoch_idx < 10:
         return 0.001
-    return 0.0001
+    return max( 1e-6, 0.0001 - epoch_idx * 1e-6 )
 
 def train_from_scratch(source_folder, target_folder, contexts, num_classes, save_at_end=False, ngpus=1):
     # finder = preprocess_finder()
@@ -361,7 +361,7 @@ def train_from_scratch(source_folder, target_folder, contexts, num_classes, save
         # scales = [(75,75), (150,150), (224,224)]
         # epochses = [10, 10, 200]
         scales = [(224,224)]
-        epochses = [100]
+        epochses = [110]
         for scale, epochs in zip(scales, epochses):
             train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, lrCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
 
