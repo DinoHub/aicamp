@@ -4,12 +4,14 @@ import keras
 import kerasapps.keras_applications
 kerasapps.keras_applications.set_keras_submodules(backend=keras.backend, layers=keras.layers,models=keras.models, utils=keras.utils)
 
+from keras import optimizers
+
 from keras.layers import Conv2D, MaxPooling2D, Input, Dense, GlobalAveragePooling2D, BatchNormalization, Activation
 from keras.models import Model, load_model
 
 from keras.preprocessing.image import ImageDataGenerator
 
-from keras.callbacks import ModelCheckpoint, CSVLogger, TensorBoard
+from keras.callbacks import ModelCheckpoint, CSVLogger, TensorBoard, LearningRateScheduler
 
 from utils.preprocess_finder import finder
 from utils.sample_competition_poses import generate_train_val_split
@@ -35,6 +37,13 @@ from utils.sample_competition_poses import generate_train_val_split
 #             return lambda x: x / 255.
 
 #     return finder
+
+def scheduler(epoch_idx):
+    if epoch_idx < 3:
+        return 0.01
+    elif epoch_idx < 10:
+        return 0.001
+    return 0.0001
 
 def get_model_0(num_classes, verbose=True):
     input_img = Input(shape=(224, 224, 3))
@@ -253,9 +262,10 @@ def get_resnet50(num_classes, verbose=True):
     return 32, (224, 224), model
 
 def get_mobilenet_v2(num_classes, verbose=True):
-    from keras.applications.mobilenet_v2 import MobileNetV2
+    from kerasapps.keras_applications.mobilenet_v2 import MobileNetV2
+    # from keras.applications.mobilenet_v2 import MobileNetV2
     # base_model = MobileNetV2(input_shape=(224,224,3), weights='imagenet', include_top=False)
-    base_model = MobileNetV2(weights='imagenet', include_top=False)
+    base_model = MobileNetV2(weights='imagenet', alpha=1.4, include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
     # x = Dense(1024, activation='relu')(x)
@@ -306,7 +316,7 @@ def get_model(context, num_classes, verbose=True):
     elif context.startswith('mobilenet_v2'):
         return get_mobilenet_v2(num_classes, verbose)
 
-def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, kwargs, bs, train_folder, val_folder, n_epochs):
+def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, lrCallback, kwargs, bs, train_folder, val_folder, n_epochs):
     # more intense augmentations
     train_datagen = ImageDataGenerator(
             rotation_range=45,#in deg
@@ -330,12 +340,17 @@ def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, kwa
             batch_size=bs,
             class_mode='categorical')
 
+    if lrCallback is not None:
+        all_callbacks = [csvLogger, valLossCP, valAccCP, tbCallback, lrCallback]
+    else:
+        all_callbacks = [csvLogger, valLossCP, valAccCP, tbCallback]
+
     model.fit_generator(train_generator,
             steps_per_epoch=train_generator.samples // bs,
             epochs=n_epochs,
             validation_data=validation_generator,
             validation_steps=validation_generator.samples // bs,
-            callbacks=[csvLogger, valLossCP, valAccCP, tbCallback])
+            callbacks=all_callbacks)
 
 def train_from_scratch(source_folder, target_folder, contexts, num_classes, save_at_end=False, ngpus=1):
     # finder = preprocess_finder()
@@ -348,16 +363,20 @@ def train_from_scratch(source_folder, target_folder, contexts, num_classes, save
         if not os.path.exists( 'models/{}'.format(context) ):
             os.makedirs( 'models/{}'.format(context) )
 
-        bs, target_size, model = get_model(context, num_classes, ngpus=ngpus)
+        bs, target_size, model = get_model(context, num_classes)
         if ngpus > 1:
             model = multi_gpu_model(model, gpus=ngpus, cpu_relocation=True)
-        model.compile(optimizer='adam',
+        model.compile(optimizer=optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True),
                       loss='categorical_crossentropy',
                       metrics=['accuracy'])
+        # model.compile(optimizer='adam',
+        #               loss='categorical_crossentropy',
+        #               metrics=['accuracy'])
         csvLogger = CSVLogger('logs/{}.log'.format(context))
         valLossCP = ModelCheckpoint('models/{}/{}_loss.hdf5'.format(context, context), save_best_only=True)
         valAccCP = ModelCheckpoint('models/{}/{}_acc.hdf5'.format(context, context), monitor='val_acc', save_best_only=True)
         tbCallback = TensorBoard( log_dir='./{}_tblogs'.format(context), histogram_freq=0, write_graph=True, write_images=True )
+        lrCallback = LearningRateScheduler(scheduler, verbose=1)
 
         # progressive scaling
         # scales = [(75,75), (150,150), (224,224)]
@@ -365,7 +384,7 @@ def train_from_scratch(source_folder, target_folder, contexts, num_classes, save
         scales = [(224,224)]
         epochses = [100]
         for scale, epochs in zip(scales, epochses):
-            train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
+            train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, lrCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
 
         if save_at_end:
             model.save('models/{}/{}_last.hdf5'.format(context,context))
@@ -398,7 +417,7 @@ if __name__ == '__main__':
     print('Num of GPUs visible to me: {}'.format(ngpus))
     print(gpus)
 
-    base_data_folder = 'data/TIL2019_v0.2/original'
+    base_data_folder = 'data/full_data'
 
     num_classes = get_num_classes(base_data_folder)
 
@@ -413,7 +432,8 @@ if __name__ == '__main__':
     # contexts = ['resnet152_v2', 'resnet101_v2']
     # contexts = ['inception_resnet_v2', 'inception_resnet_v2_255', 'inception_v3', 'inception_v3_255', 'xception', 'xception_255']
     # contexts = ['resnet50_1', 'resnet50_2', 'resnet50_3']
-    contexts = ['xception_og_{}'.format(idx) for idx in range(10)]
-    contexts += ['resnet50_og_{}'.format(idx) for idx in range(10)]
+    # contexts = ['xception_og_{}'.format(idx) for idx in range(10)]
+    # contexts += ['resnet50_og_{}'.format(idx) for idx in range(10)]
+    contexts = ['mobilenet_v2']
     train_from_scratch(source_folder, target_folder, contexts, num_classes, ngpus=ngpus)
     # resume_train(train_folder, val_folder, 'inception_v3', 'models/inception_v3/inception_v3_acc.hdf5', (224,224), 100, 64)
