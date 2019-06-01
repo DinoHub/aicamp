@@ -68,7 +68,7 @@ def groupby_pids(pose_dirp):
     pose_dict = defaultdict(list)
     img_names = os.listdir( pose_dirp )
     for img_name in img_names:
-        _, pid, _ = img_name.split('_')
+        _, pid = img_name.split('_')
         pose_dict[pid].append( img_name )
     return pose_dict
 
@@ -157,7 +157,7 @@ def sample_validation_set():
                 shutil.move( src_fp, tgt_fp )
             idx += 1
 
-def generate_train_val_split(source_folder, target_folder, ratio=0.15):
+def generate_train_val_split(source_folder, target_folder, ratio=0.15, remove_source=False):
     # ratio = 0.15
 
     if os.path.exists( target_folder ):
@@ -204,6 +204,8 @@ def generate_train_val_split(source_folder, target_folder, ratio=0.15):
                 # print('moving {} to {}'.format(src_fp, tgt_fp))
                 shutil.copy( src_fp, tgt_fp )
             idx += 1
+    if remove_source:
+        shutil.rmtree( source_folder )
 
 def split_into_og_curveball( tilfolder, target_folder ):
     from distutils.dir_util import copy_tree
@@ -248,7 +250,7 @@ def split_into_og_curveball( tilfolder, target_folder ):
         target_pose_path = os.path.join(curveball_test, pose)
         copy_tree( source_pose_path, target_pose_path )
 
-def sample_pose_folders( source_folder, target_parent_folder, sample_name, pose_list, mgmt_dict, target_ratio, create_pose_folders=True, keep_pids=True ):
+def sample_pose_folders( source_folder, target_parent_folder, sample_name, pose_list, mgmt_dict, labels_dict, target_ratio, create_pose_folders=True, keep_pids=True, val_ratio=None ):
     sample_folder = os.path.join( target_parent_folder, sample_name )
     
     idxes = [i for i in range(1000000)]
@@ -256,32 +258,83 @@ def sample_pose_folders( source_folder, target_parent_folder, sample_name, pose_
 
     labels = []
     for pose in pose_list:
-        target_pose_folder = os.path.join( sample_folder, pose ) if create_pose_folders else sample_folder
-        if not os.path.exists( target_pose_folder ):
-            os.makedirs( target_pose_folder )
         pose_path = os.path.join( source_folder, pose )
         pose_dict, full_count = mgmt_dict[pose]
         shuff_list = list(pose_dict.keys())
-        # print(shuff_list)
+        quota = int(target_ratio * full_count) if target_ratio is not None else sum( [len(pose_dict[k]) for k in pose_dict] )
+
         random.shuffle( shuff_list )
-        # print(shuff_list)
-        quota = int(target_ratio * full_count) if target_ratio is not None else None
-        # print(quota)
-        total_picked = 0
+        if val_ratio is None:
+            target_pose_folder = os.path.join( sample_folder, pose ) if create_pose_folders else sample_folder
+            if not os.path.exists( target_pose_folder ):
+                os.makedirs( target_pose_folder )
+            # pose_path = os.path.join( source_folder, pose )
+            # pose_dict, full_count = mgmt_dict[pose]
+            # shuff_list = list(pose_dict.keys())
+            # # print(shuff_list)
+            # random.shuffle( shuff_list )
+            # print(shuff_list)
+            # quota = int(target_ratio * full_count) if target_ratio is not None else None
+            # print(quota)
+            total_picked = 0
 
-        while len(shuff_list) > 0 and (quota is None or total_picked < quota):
-            pid = shuff_list.pop(0)
-            pid_img_paths = pose_dict[pid]
-            for pid_img in pid_img_paths:
-                full_img_path = os.path.join( pose_path, pid_img )
-                target_img_path = os.path.join( target_pose_folder, ( '{0:06}_'.format(idxes.pop(0)) + '{}.png'.format(pid) ) if keep_pids else '{0:06}.png'.format(idxes.pop(0)) )
-                shutil.copyfile( full_img_path, target_img_path )
-                labels.append( (target_img_path, pose) )
+            # while len(shuff_list) > 0 and (quota is None or total_picked < quota):
+            while total_picked < quota:
+                pid = shuff_list.pop(0)
+                pid_img_paths = pose_dict[pid]
+                for pid_img in pid_img_paths:
+                    full_img_path = os.path.join( pose_path, pid_img )
+                    target_img_path = os.path.join( target_pose_folder, ( '{0:06}_'.format(idxes.pop(0)) + '{}.png'.format(pid) ) if keep_pids else '{0:06}.png'.format(idxes.pop(0)) )
+                    shutil.copyfile( full_img_path, target_img_path )
+                    labels.append( (target_img_path, pose) )
 
-                # print(full_img_path)
-            total_picked += len( pid_img_paths )
-            del pose_dict[pid]
-    return labels
+                    # print(full_img_path)
+                total_picked += len( pid_img_paths )
+                del pose_dict[pid]
+        else:
+            target_val_pose_folder = os.path.join( os.path.join( sample_folder, 'val' ), pose ) if create_pose_folders else sample_folder
+            if not os.path.exists( target_val_pose_folder ):
+                os.makedirs( target_val_pose_folder )
+            target_train_pose_folder = os.path.join( os.path.join( sample_folder, 'train' ), pose ) if create_pose_folders else sample_folder
+            if not os.path.exists( target_train_pose_folder ):
+                os.makedirs( target_train_pose_folder )
+            # pose_path = os.path.join( source_folder, pose )
+            # pose_dict, full_count = mgmt_dict[pose]
+            # shuff_list = list(pose_dict.keys())
+            # # print(shuff_list)
+            # random.shuffle( shuff_list )
+            # print(shuff_list)
+            val_quota = int(quota * val_ratio)
+            # print(quota)
+            total_picked = 0
+
+            # while len(shuff_list) > 0 and (val_quota is None or total_picked < val_quota):
+            while total_picked < val_quota:
+                pid = shuff_list.pop(0)
+                pid_img_paths = pose_dict[pid]
+                for pid_img in pid_img_paths:
+                    full_img_path = os.path.join( pose_path, pid_img )
+                    target_img_path = os.path.join( target_val_pose_folder, ( '{0:06}_'.format(idxes.pop(0)) + '{}.png'.format(pid) ) if keep_pids else '{0:06}.png'.format(idxes.pop(0)) )
+                    shutil.copyfile( full_img_path, target_img_path )
+                    labels.append( (target_img_path, pose) )
+
+                    # print(full_img_path)
+                total_picked += len( pid_img_paths )
+                del pose_dict[pid]
+
+            while total_picked < quota:
+                pid = shuff_list.pop(0)
+                pid_img_paths = pose_dict[pid]
+                for pid_img in pid_img_paths:
+                    full_img_path = os.path.join( pose_path, pid_img )
+                    target_img_path = os.path.join( target_train_pose_folder, ( '{0:06}_'.format(idxes.pop(0)) + '{}.png'.format(pid) ) if keep_pids else '{0:06}.png'.format(idxes.pop(0)) )
+                    shutil.copyfile( full_img_path, target_img_path )
+                    labels.append( (target_img_path, pose) )
+
+                    # print(full_img_path)
+                total_picked += len( pid_img_paths )
+                del pose_dict[pid]
+    labels_dict[sample_name] = labels
 
 def generate_real_competition( poses_folder, target_folder ):
     assert os.path.exists(poses_folder), 'source pose folder does not exist'
@@ -301,47 +354,54 @@ def generate_real_competition( poses_folder, target_folder ):
     labels = {}
 
     # train
-    labels['0_train'] = sample_pose_folders( source_folder=poses_folder,
+    sample_pose_folders( source_folder=poses_folder,
                          target_parent_folder=target_folder, 
-                         sample_name='0_train',
+                         sample_name='til1',
                          pose_list=original_poses,
                          mgmt_dict=overall_dict,
-                         target_ratio=0.25,
-                         create_pose_folders=True )
+                         labels_dict=labels,
+                         target_ratio=0.45,
+                         create_pose_folders=True,
+                         val_ratio=0.2 )
 
     # leaderboard1
-    labels['1_leaderboard1'] = sample_pose_folders( source_folder=poses_folder,
+    sample_pose_folders( source_folder=poses_folder,
                          target_parent_folder=target_folder, 
-                         sample_name='1_leaderboard1',
-                         pose_list=original_poses,
+                         sample_name='leaderboard1',
+                         pose_list=all_poses,
                          mgmt_dict=overall_dict,
-                         target_ratio=0.15,
+                         labels_dict=labels,
+                         target_ratio=0.1,
                          create_pose_folders=False )
 
     # curveball
-    labels['2_curveball'] = sample_pose_folders( source_folder=poses_folder,
+    sample_pose_folders( source_folder=poses_folder,
                          target_parent_folder=target_folder, 
-                         sample_name='2_curveball',
+                         sample_name='til2',
                          pose_list=curveball_poses,
                          mgmt_dict=overall_dict,
-                         target_ratio=0.40,
-                         create_pose_folders=True )
+                         labels_dict=labels,
+                         target_ratio=0.45,
+                         create_pose_folders=True,
+                         val_ratio=0.2 )
 
     # leaderboard2
-    labels['3_leaderboard2'] = sample_pose_folders( source_folder=poses_folder,
+    sample_pose_folders( source_folder=poses_folder,
                          target_parent_folder=target_folder, 
-                         sample_name='3_leaderboard2',
+                         sample_name='leaderboard2',
                          pose_list=all_poses,
                          mgmt_dict=overall_dict,
-                         target_ratio=0.15,
+                         labels_dict=labels,
+                         target_ratio=0.1,
                          create_pose_folders=False )
 
     # finaltestset
-    labels['4_finaltestset'] = sample_pose_folders( source_folder=poses_folder,
+    sample_pose_folders( source_folder=poses_folder,
                          target_parent_folder=target_folder, 
-                         sample_name='4_finaltestset',
+                         sample_name='finaltest',
                          pose_list=all_poses,
                          mgmt_dict=overall_dict,
+                         labels_dict=labels,
                          target_ratio=None,
                          create_pose_folders=False,
                          keep_pids=False )
@@ -365,7 +425,7 @@ def annonimize_poses( poses_folder ):
 
 if __name__ == '__main__':
     source_folder = '/home/angeugn/Workspace/aicamp/data/P16SES'
-    target_folder = 'TIL2019_v1.0'
+    target_folder = 'TIL2019_v1.2'
 
     # annonimize_poses( source_folder )
 
