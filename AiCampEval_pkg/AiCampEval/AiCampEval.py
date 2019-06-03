@@ -7,6 +7,7 @@ import time
 import wget
 import tarfile
 from pprint import pprint
+from urllib.parse import urljoin
 
 ## participants will type the following into the file with test_model() where they take np array input and give list of string predictions 
 """from eval import eval
@@ -34,7 +35,8 @@ def eval_submit(test_model, submission_type, team_secret):
 
     baseurl = 'https://ai-camp.s3-us-west-2.amazonaws.com'
     tar_ext = '.tar.xz'
-    url = os.path.join(baseurl, submission_type) + tar_ext
+    tar_fn = submission_type + tar_ext
+    url = urljoin(baseurl, tar_fn)
 
     derek_folder = '/tmp/derek_'+str(submission_type)
     if not os.path.exists(derek_folder):
