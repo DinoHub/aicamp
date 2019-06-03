@@ -54,10 +54,10 @@ def eval_submit(test_model, submission_type, team_secret):
         end = time.time()
         print('\nTime taken for download: {:.3f}s'.format(end-start))
     evan = [] #list of np arrays
-    derek_file = derek_folder + '/' + str(submission_type)
-    test_imgs = os.listdir(derek_file)
+    # derek_folder = derek_folder + '/' + str(submission_type)
+    test_imgs = os.listdir(derek_folder)
     for img in test_imgs:
-        eugene = Image.open(derek_file+'/'+img) # eugene is opened pillow thingy (bitmap?)
+        eugene = Image.open(derek_folder+'/'+img) # eugene is opened pillow thingy (bitmap?)
         evan.append(np.array(eugene))
     
     print('\nPredicting...')    
