@@ -4,37 +4,18 @@ import keras
 import kerasapps.keras_applications
 kerasapps.keras_applications.set_keras_submodules(backend=keras.backend, layers=keras.layers,models=keras.models, utils=keras.utils)
 
+from keras import optimizers
+
 from keras.layers import Conv2D, MaxPooling2D, Input, Dense, GlobalAveragePooling2D, BatchNormalization, Activation
 from keras.models import Model, load_model
 
 from keras.preprocessing.image import ImageDataGenerator
 
-from keras.callbacks import ModelCheckpoint, CSVLogger, TensorBoard
+from keras.callbacks import ModelCheckpoint, CSVLogger, TensorBoard, LearningRateScheduler
 
 from utils.preprocess_finder import finder
 from utils.sample_competition_poses import generate_train_val_split
 # from mobilenetv2 import mobilenetv2
-
-# def preprocess_finder():
-#     def finder(key):
-#         if key == 'resnet50':
-#             return keras.applications.resnet50.preprocess_input
-#         elif key == 'mobilenet_v2':
-#             return keras.applications.mobilenet_v2.preprocess_input
-#         elif key == 'inception_v3':
-#             return keras.applications.inception_v3.preprocess_input
-#         elif key == 'inception_resnet_v2':
-#             return keras.applications.inception_resnet_v2.preprocess_input
-#         elif key == 'xception':
-#             return keras.applications.xception.preprocess_input
-#         elif key.startswith('resnet') and key.endswith('_v2'):
-#             return kerasapps.keras_applications.resnet_v2.preprocess_input
-#         elif key.startswith('resnet'):
-#             return kerasapps.keras_applications.resnet.preprocess_input
-#         else:
-#             return lambda x: x / 255.
-
-#     return finder
 
 def get_model_0(num_classes, verbose=True):
     input_img = Input(shape=(224, 224, 3))
@@ -64,9 +45,9 @@ def get_model_0(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
 
     model = Model(inputs=input_img, outputs=predictions)
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 256, (224, 224), model
@@ -113,9 +94,9 @@ def get_model_1(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
 
     model = Model(inputs=input_img, outputs=predictions)
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 64, (224, 224), model
@@ -130,9 +111,9 @@ def get_inception_resnet_v2(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -147,9 +128,9 @@ def get_inception_v3(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -166,9 +147,9 @@ def get_xception(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -186,9 +167,9 @@ def get_resnet152_v2(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -206,9 +187,9 @@ def get_resnet101_v2(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -226,9 +207,9 @@ def get_resnet152(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -245,26 +226,27 @@ def get_resnet50(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
 
 def get_mobilenet_v2(num_classes, verbose=True):
-    from keras.applications.mobilenet_v2 import MobileNetV2
+    from kerasapps.keras_applications.mobilenet_v2 import MobileNetV2
+    # from keras.applications.mobilenet_v2 import MobileNetV2
     # base_model = MobileNetV2(input_shape=(224,224,3), weights='imagenet', include_top=False)
-    base_model = MobileNetV2(weights='imagenet', include_top=False)
+    base_model = MobileNetV2(weights='imagenet', alpha=1.4, include_top=False)
     x = base_model.output
     x = GlobalAveragePooling2D()(x)
     # x = Dense(1024, activation='relu')(x)
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -279,9 +261,9 @@ def get_resnet101(num_classes, verbose=True):
     predictions = Dense(num_classes, activation='softmax')(x)
     model = Model(inputs=base_model.input, outputs=predictions)
 
-    model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
+    # model.compile(optimizer='adam',
+    #               loss='categorical_crossentropy',
+    #               metrics=['accuracy'])
     if verbose:
         model.summary()
     return 32, (224, 224), model
@@ -306,7 +288,7 @@ def get_model(context, num_classes, verbose=True):
     elif context.startswith('mobilenet_v2'):
         return get_mobilenet_v2(num_classes, verbose)
 
-def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, kwargs, bs, train_folder, val_folder, n_epochs):
+def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, lrCallback, kwargs, bs, train_folder, val_folder, n_epochs):
     # more intense augmentations
     train_datagen = ImageDataGenerator(
             rotation_range=45,#in deg
@@ -330,38 +312,58 @@ def train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, kwa
             batch_size=bs,
             class_mode='categorical')
 
+    if lrCallback is not None:
+        all_callbacks = [csvLogger, valLossCP, valAccCP, tbCallback, lrCallback]
+    else:
+        all_callbacks = [csvLogger, valLossCP, valAccCP, tbCallback]
+
     model.fit_generator(train_generator,
             steps_per_epoch=train_generator.samples // bs,
             epochs=n_epochs,
             validation_data=validation_generator,
             validation_steps=validation_generator.samples // bs,
-            callbacks=[csvLogger, valLossCP, valAccCP, tbCallback])
+            callbacks=all_callbacks)
 
-def train_from_scratch(source_folder, target_folder, contexts, num_classes, save_at_end=False):
+def scheduler(epoch_idx):
+    if epoch_idx < 3:
+        return 0.01
+    elif epoch_idx < 10:
+        return 0.001
+    return max( 8e-5, 0.0001 - epoch_idx * 1e-6 )
+
+def train_from_scratch(source_folder, target_folder, contexts, num_classes, save_at_end=False, ngpus=1):
     # finder = preprocess_finder()
     train_folder = os.path.join(target_folder, 'train')
     val_folder = os.path.join(target_folder, 'val')
     for context in contexts:
         # Each round, we train on a different split
-        generate_train_val_split(source_folder, target_folder)
+        generate_train_val_split(source_folder, target_folder, ratio=0.1)
 
         if not os.path.exists( 'models/{}'.format(context) ):
             os.makedirs( 'models/{}'.format(context) )
 
         bs, target_size, model = get_model(context, num_classes)
-
+        if ngpus > 1:
+            model = multi_gpu_model(model, gpus=ngpus, cpu_relocation=True)
+        model.compile(optimizer=optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True),
+                      loss='categorical_crossentropy',
+                      metrics=['accuracy'])
+        # model.compile(optimizer='adam',
+        #               loss='categorical_crossentropy',
+        #               metrics=['accuracy'])
         csvLogger = CSVLogger('logs/{}.log'.format(context))
         valLossCP = ModelCheckpoint('models/{}/{}_loss.hdf5'.format(context, context), save_best_only=True)
         valAccCP = ModelCheckpoint('models/{}/{}_acc.hdf5'.format(context, context), monitor='val_acc', save_best_only=True)
         tbCallback = TensorBoard( log_dir='./{}_tblogs'.format(context), histogram_freq=0, write_graph=True, write_images=True )
+        lrCallback = LearningRateScheduler(scheduler, verbose=1)
 
         # progressive scaling
         # scales = [(75,75), (150,150), (224,224)]
         # epochses = [10, 10, 200]
         scales = [(224,224)]
-        epochses = [100]
+        epochses = [110]
         for scale, epochs in zip(scales, epochses):
-            train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
+            train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, lrCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
 
         if save_at_end:
             model.save('models/{}/{}_last.hdf5'.format(context,context))
@@ -381,11 +383,20 @@ def get_num_classes(base_data_folder):
     train_folder = os.path.join( base_data_folder, 'train' )
     return len( list( os.listdir( train_folder ) ) )
 
-if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"]="1"
-    # os.environ["CUDA_VISIBLE_DEVICES"]="1"
+def get_available_gpus():
+    from tensorflow.python.client import device_lib
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos if x.device_type == 'GPU']
 
-    base_data_folder = 'data/TIL2019_v0.2/original'
+if __name__ == '__main__':
+    ## Uncomment to use specific gpu:
+    # os.environ["CUDA_VISIBLE_DEVICES"]="0"
+    gpus = get_available_gpus()
+    ngpus = len(gpus)
+    print('Num of GPUs visible to me: {}'.format(ngpus))
+    print(gpus)
+
+    base_data_folder = 'data/full_data'
 
     num_classes = get_num_classes(base_data_folder)
 
@@ -400,7 +411,8 @@ if __name__ == '__main__':
     # contexts = ['resnet152_v2', 'resnet101_v2']
     # contexts = ['inception_resnet_v2', 'inception_resnet_v2_255', 'inception_v3', 'inception_v3_255', 'xception', 'xception_255']
     # contexts = ['resnet50_1', 'resnet50_2', 'resnet50_3']
-    contexts = ['xception_og_{}'.format(idx) for idx in range(10)]
-    contexts += ['resnet50_og_{}'.format(idx) for idx in range(10)]
-    train_from_scratch(source_folder, target_folder, contexts, num_classes)
+    # contexts = ['xception_og_{}'.format(idx) for idx in range(10)]
+    # contexts += ['resnet50_og_{}'.format(idx) for idx in range(10)]
+    contexts = ['mobilenet_v2_1']
+    train_from_scratch(source_folder, target_folder, contexts, num_classes, ngpus=ngpus)
     # resume_train(train_folder, val_folder, 'inception_v3', 'models/inception_v3/inception_v3_acc.hdf5', (224,224), 100, 64)
