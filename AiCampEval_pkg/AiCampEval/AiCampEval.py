@@ -89,6 +89,9 @@ def eval_submit(test_model, submission_type, team_secret):
     print('\nTotal time taken for model evaluation: {:.3f}s\n'.format(end-start))
     ## Calling the function to submit
     pprint(submit_result(submission))
+    ## DON'T CHEAT >:(
+    os.remove(derek_folder+'.tar')
+    os.rmdir(derek_folder)
 
 def test():
     print('Hello World \n-Alpheus & Ivan')
