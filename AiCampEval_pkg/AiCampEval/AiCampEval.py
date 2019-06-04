@@ -59,16 +59,16 @@ def eval_submit(test_model, submission_type, team_secret):
     test_imgs = os.listdir(derek_folder)
     for img in test_imgs:
         eugene = Image.open(derek_folder+'/'+img) # eugene is opened pillow thingy (bitmap?)
-        evan.append(np.array(eugene))
+        if img == "BINGO.png":
+            evan.insert(0, np.array(eugene))
+        else:
+            evan.append(np.array(eugene))
     
     print('\nPredicting...')    
     predictions = test_model(evan) #calls student's test_model() function, feeding them 
                             # the image and getting a prediction
                             # students have to prepare their own py file with the function test_model()
-    for bb in predictions:
-        bb = bb.lower()
-
-    # print(predictions) #muahaha
+    del predictions[0]
 
     # Preparing results into dataframe
     results=pd.DataFrame({"filename":test_imgs,
@@ -91,8 +91,10 @@ def eval_submit(test_model, submission_type, team_secret):
     ## Calling the function to submit
     pprint(submit_result(submission))
     ## DON'T CHEAT >:(
-    os.remove(derek_folder+'.tar')
-    shutil.rmtree(derek_folder, ignore_errors=True)
+    if os.path.exists(derek_folder+'.tar'):
+        os.remove(derek_folder+'.tar')
+    if os.path.isdir(derek_folder):
+        shutil.rmtree(derek_folder, ignore_errors=True)
 
 def test():
     print('Hello World \n-Alpheus & Ivan')
