@@ -8,6 +8,7 @@ import wget
 import tarfile
 from pprint import pprint
 from urllib.parse import urljoin
+import shutil
 
 ## participants will type the following into the file with test_model() where they take np array input and give list of string predictions 
 """from eval import eval
@@ -91,7 +92,7 @@ def eval_submit(test_model, submission_type, team_secret):
     pprint(submit_result(submission))
     ## DON'T CHEAT >:(
     os.remove(derek_folder+'.tar')
-    os.rmdir(derek_folder)
+    shutil.rmtree(derek_folder, ignore_errors=True)
 
 def test():
     print('Hello World \n-Alpheus & Ivan')
