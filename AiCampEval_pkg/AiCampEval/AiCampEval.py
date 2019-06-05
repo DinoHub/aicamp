@@ -57,9 +57,11 @@ def eval_submit(test_model, submission_type, team_secret):
     evan = [] #list of np arrays
     # derek_folder = derek_folder + '/' + str(submission_type)
     test_imgs = os.listdir(derek_folder)
+    found_bingo = False
     for img in test_imgs:
         eugene = Image.open(derek_folder+'/'+img) # eugene is opened pillow thingy (bitmap?)
         if img == "BINGO.png":
+            found_bingo = True
             evan.insert(0, np.array(eugene))
         else:
             evan.append(np.array(eugene))
@@ -68,7 +70,8 @@ def eval_submit(test_model, submission_type, team_secret):
     predictions = test_model(evan) #calls student's test_model() function, feeding them 
                             # the image and getting a prediction
                             # students have to prepare their own py file with the function test_model()
-    del predictions[0]
+    if found_bingo:
+        del predictions[0]
 
     # Preparing results into dataframe
     results=pd.DataFrame({"filename":test_imgs,
