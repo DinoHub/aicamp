@@ -1,9 +1,9 @@
 Metadata-Version: 2.1
 Name: AiCampEval
-Version: 1.3
+Version: 1.7
 Summary: Module to evaluate deep learning model
 Home-page: https://github.com/brainhack-dsta/til-ai-camp
-Author: Alpheus Lim, Ivan Yang
+Author: Eugene Ang, Evan Ling, Alpheus Lim, Ivan Yang (E2 AI)
 Author-email: dstadh17@gmail.com
 License: UNKNOWN
 Description: Hello World
@@ -23,6 +23,12 @@ Description: Hello World
         - test_model : function written by you that takes numpy images input and returns prediction string
         - 'submission_1' : string representing the submission type, to be released at submission time
         - 'team123' : team secret. your team's secret id, please do not share this.
+        
+        Optional argument:
+        - 'batch_size' : Size of each batch of test images. Default: 400.
+        
+        # Think, Adapt, Overcome
+        # Use all the data you can get :)
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License

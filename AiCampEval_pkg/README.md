@@ -15,3 +15,9 @@ where arguments are:
 - test_model : function written by you that takes numpy images input and returns prediction string
 - 'submission_1' : string representing the submission type, to be released at submission time
 - 'team123' : team secret. your team's secret id, please do not share this.
+
+Optional argument:
+- 'batch_size' : Size of each batch of test images. Default: 400.
+
+# Think, Adapt, Overcome
+# Use all the data you can get :)

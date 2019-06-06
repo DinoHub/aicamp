@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='AiCampEval',  
-    version='1.6',
-    author="Alpheus Lim, Ivan Yang",
+    version='1.7',
+    author="Eugene Ang, Evan Ling, Alpheus Lim, Ivan Yang (E2 AI)",
     author_email="dstadh17@gmail.com",
     description="Module to evaluate deep learning model",
     long_description=long_description,
