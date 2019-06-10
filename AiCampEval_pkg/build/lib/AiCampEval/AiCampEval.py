@@ -37,7 +37,8 @@ def submit_result(submission):
 def eval_submit(test_model, submission_type, team_secret, batch_size=400):
     start = time.time()
     assert batch_size >= 1, 'Batch size must be >= 1'
-    baseurl = 'https://ai-camp.s3-us-west-2.amazonaws.com'
+    # baseurl = 'https://ai-camp.s3-us-west-2.amazonaws.com' # for everyone
+    baseurl = 'https://ai-camp-internal.s3.amazonaws.com' # ONLY FOR TESTERS DO NOT RELEASE
     tar_ext = '.tar.xz'
     tar_fn = submission_type + tar_ext
     url = urljoin(baseurl, tar_fn)

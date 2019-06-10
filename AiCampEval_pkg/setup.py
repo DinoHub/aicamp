@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='AiCampEval',  
-    version='1.7',
+    version='1.75',
     author="Eugene Ang, Evan Ling, Alpheus Lim, Ivan Yang (E2 AI)",
     author_email="dstadh17@gmail.com",
-    description="Module to evaluate deep learning model",
+    description="Module to evaluate deep learning model (TESTERS ONLY)",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/brainhack-dsta/til-ai-camp",
