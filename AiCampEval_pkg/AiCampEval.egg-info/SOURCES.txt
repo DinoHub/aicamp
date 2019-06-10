@@ -1,0 +1,9 @@
+README.md
+setup.py
+AiCampEval/AiCampEval.py
+AiCampEval/__init__.py
+AiCampEval.egg-info/PKG-INFO
+AiCampEval.egg-info/SOURCES.txt
+AiCampEval.egg-info/dependency_links.txt
+AiCampEval.egg-info/requires.txt
+AiCampEval.egg-info/top_level.txt

@@ -32,9 +32,11 @@ def eval_softmax_vectors(test_folder, preds):
     class_labels = sorted( list(os.listdir(test_folder)) )
     i=0
     score = 0
+    filenames = []
     for label, cl in enumerate(class_labels):
         pose_folder = os.path.join( test_folder, cl )
-        for _ in os.listdir( pose_folder ):
+        for fn in os.listdir( pose_folder ):
+            filenames.append(fn)
             pred = np.argmax( preds[i] )
             if pred == label:
                 score+=1
@@ -43,6 +45,7 @@ def eval_softmax_vectors(test_folder, preds):
     print('Total evaluated: {}'.format(i))
     print('score: {}'.format(score))
     print('accuracy: {0:.6f}'.format( score / i ))
+    return filenames
 
 def ensemble_models(models_path, test_folder, num_classes, use_preds=False):
     total_testimgs = num_jpgs_nested_in_folder( test_folder )
@@ -86,7 +89,25 @@ def ensemble_models(models_path, test_folder, num_classes, use_preds=False):
                     i+=1
 
             del model
-    eval_softmax_vectors(test_folder, all_preds)
+    # all_preds /= total_models
+    sums = np.sum( all_preds, axis=1 )
+    for i in range(all_preds.shape[0]):
+        all_preds[i] /= sums[i]
+    filenames = eval_softmax_vectors(test_folder, all_preds)
+    # np.save( 'predictions/fulldata_yolo_ensemble_0.npy', all_preds )
+    # import pickle
+    # with open('full_cropped_filenames.p', 'wb') as fnp:
+    #     pickle.dump( filenames, fnp )
+    # np.savetxt('full_cropped_preds.txt', all_preds)
+
+
+alpha=0.5
+num_classes=16
+import keras.losses
+import keras.backend as K
+def custom_loss(ytrue, ypred):
+    return alpha*K.categorical_crossentropy(ytrue[:,:num_classes], ypred) + (1. - alpha)*K.categorical_crossentropy(ytrue[:,num_classes:], ypred)
+keras.losses.custom_loss = custom_loss
 
 def eval_models_singly(models_path, test_folder, num_classes, save_preds=True):
     class_labels = sorted( list(os.listdir(test_folder)) )
@@ -101,6 +122,7 @@ def eval_models_singly(models_path, test_folder, num_classes, save_preds=True):
             continue
         model_path = os.path.join( models_path, model_ )
         model = load_model(model_path)
+        model.summary()
         context = model_[:model_.rfind('_')]
         print('Testing model: {}'.format(model_))
 
@@ -116,16 +138,14 @@ def eval_models_singly(models_path, test_folder, num_classes, save_preds=True):
                 img = image.load_img(img_path, target_size=target_size)
                 x = image.img_to_array(img)
                 x = np.expand_dims(x, axis=0)
-                x = finder(context, verbose=True)(x)
+                x = finder(context, verbose=False)(x)
                 preds = model.predict( x )
                 all_preds[i] += preds[0]
                 i+=1
-            print(all_preds)
         eval_softmax_vectors(test_folder, all_preds)
         if save_preds:
             np.save( 'predictions/{}.npy'.format(context), all_preds )
         del model
-        exit()
 
 def conf_mat():
     from sklearn.metrics import classification_report, confusion_matrix
@@ -138,11 +158,11 @@ if __name__ == '__main__':
         print('usage: python3 test.py path/to/models/folder path/to/test/folder')
         exit()
 
-    os.environ["CUDA_VISIBLE_DEVICES"]="1"
+    os.environ["CUDA_VISIBLE_DEVICES"]="0"
     models_path = sys.argv[1]
     test_folder = sys.argv[2]
     num_classes = 16
     # models_path = 'models/best_models'
     # test_folder = 'data/TIL2019_v0.1/test'
-    # eval_models_singly(models_path, test_folder, num_classes)
-    ensemble_models(models_path, test_folder, num_classes, use_preds=True)
+    eval_models_singly(models_path, test_folder, num_classes)
+    # ensemble_models(models_path, test_folder, num_classes, use_preds=True)

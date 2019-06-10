@@ -3,6 +3,25 @@ import os
 from PIL import Image
 from kerasyolo.yolo import YOLO
 
+def yolo_poses_in_folder(pose_folder, target_folder, od):
+    for pose in os.listdir(pose_folder):
+        # pose_failcount = 0
+        pose_dir = os.path.join(pose_folder, pose)
+        tgt_pose_dir = os.path.join(target_folder, pose)
+        if not os.path.exists(tgt_pose_dir):
+            os.makedirs( tgt_pose_dir )
+
+        for im in os.listdir(pose_dir):
+            im_fp = os.path.join( pose_dir, im )
+            target_fp = os.path.join( tgt_pose_dir, im )
+            # img = cv2.imread( im_fp )
+
+            # if pose not in bypass_poses:
+            img = Image.open(im_fp)
+            img_show = od.crop_largest_person( img )
+            img_show.save( target_fp, os.path.splitext(target_fp)[1][1:].upper() )
+
+
 if __name__ == '__main__':
     objs_lists = ['person']
     od_threshold = 0.3
@@ -10,30 +29,31 @@ if __name__ == '__main__':
     # od = ObjDetector( det_classes = objs_lists, threshold = od_threshold)
     od = YOLO(threshold=od_threshold)
 
-    parent_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1'
-    target_folder = '/home/angeugn/Workspace/aicamp/data/TIL2019_v0.1_yoloed'
+    parent_folder = '/home/angeugn/Workspace/aicamp/data/full_data/train'
+    target_folder = '/home/angeugn/Workspace/aicamp/data/full_data/train_yoloed'
 
-    count = 0
+    # count = 0
 
-    for split in os.listdir( parent_folder ):
-        split_dir = os.path.join(parent_folder, split)
-        tgt_split_dir = os.path.join(target_folder, split)
-        for pose in os.listdir(split_dir):
-            pose_failcount = 0
-            pose_dir = os.path.join(split_dir, pose)
-            tgt_pose_dir = os.path.join(tgt_split_dir, pose)
-            if not os.path.exists(tgt_pose_dir):
-                os.makedirs( tgt_pose_dir )
+    # for pose in os.listdir( parent_folder ):
+    #     pose_folder = os.path.join(parent_folder, pose)
+    #     target_pose_folder = os.path.join(target_folder, pose)
+    yolo_poses_in_folder( parent_folder, target_folder, od )
+        # for pose in os.listdir(split_dir):
+        #     pose_failcount = 0
+        #     pose_dir = os.path.join(split_dir, pose)
+        #     tgt_pose_dir = os.path.join(tgt_split_dir, pose)
+        #     if not os.path.exists(tgt_pose_dir):
+        #         os.makedirs( tgt_pose_dir )
 
-            for im in os.listdir(pose_dir):
-                im_fp = os.path.join( pose_dir, im )
-                target_fp = os.path.join( tgt_pose_dir, im )
-                # img = cv2.imread( im_fp )
+        #     for im in os.listdir(pose_dir):
+        #         im_fp = os.path.join( pose_dir, im )
+        #         target_fp = os.path.join( tgt_pose_dir, im )
+        #         # img = cv2.imread( im_fp )
 
-                # if pose not in bypass_poses:
-                img = Image.open(im_fp)
-                img_show = od.crop_largest_person( img )
-                img_show.save( target_fp, os.path.splitext(target_fp)[1][1:].upper() )
+        #         # if pose not in bypass_poses:
+        #         img = Image.open(im_fp)
+        #         img_show = od.crop_largest_person( img )
+        #         img_show.save( target_fp, os.path.splitext(target_fp)[1][1:].upper() )
                 # dets = od.detect_persons( img )
                 # # get the largest detection
                 # largest_det = None
