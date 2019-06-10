@@ -78,12 +78,12 @@ while True:
         total_pred = pred + pred1
         top_indices = np.argpartition( total_pred , -top_k)[-top_k:]
         tops = [(poses[i], total_pred[i]/2.0) for i in top_indices]
-        tops = sorted(tops, key=lambda x: x[1])
+        tops = sorted(tops, key=lambda x: x[1])[::-1]
 
         nextrow = 0
         nextrow_scale = 1
         for top in tops:
-            text = '{}:{}%'.format(top[0], int(top[2]*100))
+            text = '{}:{}%'.format(top[0], int(top[1]*100))
             cv2.putText(frame, text, (10, 50+nextrow), font, fontScale*nextrow_scale, color, fontThickness )
             nextrow += 50
             nextrow_scale *= 0.8
