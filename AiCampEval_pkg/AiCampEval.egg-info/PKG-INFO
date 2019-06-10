@@ -1,7 +1,7 @@
 Metadata-Version: 2.1
 Name: AiCampEval
-Version: 1.7
-Summary: Module to evaluate deep learning model
+Version: 1.75
+Summary: Module to evaluate deep learning model (TESTERS ONLY)
 Home-page: https://github.com/brainhack-dsta/til-ai-camp
 Author: Eugene Ang, Evan Ling, Alpheus Lim, Ivan Yang (E2 AI)
 Author-email: dstadh17@gmail.com
