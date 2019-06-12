@@ -1,11 +1,13 @@
 import numpy as np
 import os 
+from PIL import Image
+from skimage.transform import resize
 import keras
 
 class NpyDataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
-    def __init__(self, data_root, list_IDs, labels, batch_size=32, dim=(32,32,32), n_channels=1,
-                 n_classes=10, shuffle=True):
+    def __init__(self, data_root, list_IDs, labels, batch_size=32, dim=(224,224), n_channels=81,
+                 n_classes=15, shuffle=True):
         'Initialization'
         self.dim = dim
         self.batch_size = batch_size
@@ -50,10 +52,16 @@ class NpyDataGenerator(keras.utils.Sequence):
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
             # Store sample
-            X[i,] = np.load(os.path.join(self.data_root,ID+'{}'.format('.npy' if not ID.endswith('.npy') else '')))
+            img = np.load(os.path.join(self.data_root,ID+'{}'.format('.npy' if not ID.endswith('.npy') else '')))
+            # X[i,] = np.load(os.path.join(self.data_root,ID+'{}'.format('.npy' if not ID.endswith('.npy') else '')))
+            # img = img.astype('uint8')[:,:,:5]
+            # im = Image.fromarray(img)
+            # im.thumbnail(self.dim[:2], Image.ANTIALIAS)
+            resized = resize(img, self.dim[:2], anti_aliasing=True)
+            X[i,] = resized/255.
 
             # Store class
-            y[i] = self.labels[ID]
+            y[i] = self.labels[i]
 
         return X, keras.utils.to_categorical(y, num_classes=self.n_classes)
 
