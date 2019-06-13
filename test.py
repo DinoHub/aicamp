@@ -94,15 +94,15 @@ def ensemble_models(models_path, test_folder, num_classes, use_preds=False):
     for i in range(all_preds.shape[0]):
         all_preds[i] /= sums[i]
     filenames = eval_softmax_vectors(test_folder, all_preds)
-    # np.save( 'predictions/fulldata_yolo_ensemble_0.npy', all_preds )
-    # import pickle
-    # with open('full_cropped_filenames.p', 'wb') as fnp:
-    #     pickle.dump( filenames, fnp )
-    # np.savetxt('full_cropped_preds.txt', all_preds)
+    # np.save( 'predictions/fullcropped6_eugeneivanensemble.npy', all_preds )
+    import pickle
+    with open('fullcropped6_eugeneivanensemble_filenames.p', 'wb') as fnp:
+        pickle.dump( filenames, fnp )
+    np.savetxt('fullcropped6_eugeneivanensemble_preds.txt', all_preds)
 
 
 alpha=0.5
-num_classes=16
+num_classes=6
 import keras.losses
 import keras.backend as K
 def custom_loss(ytrue, ypred):
@@ -161,7 +161,7 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"]="0"
     models_path = sys.argv[1]
     test_folder = sys.argv[2]
-    num_classes = 16
+    num_classes = 6
     # models_path = 'models/best_models'
     # test_folder = 'data/TIL2019_v0.1/test'
     eval_models_singly(models_path, test_folder, num_classes)
