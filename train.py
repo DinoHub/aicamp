@@ -413,7 +413,8 @@ if __name__ == '__main__':
     # contexts = ['resnet152_v2', 'resnet101_v2']
     # contexts = ['inception_resnet_v2', 'inception_resnet_v2_255', 'inception_v3', 'inception_v3_255', 'xception', 'xception_255']
     # contexts = ['resnet50_1', 'resnet50_2', 'resnet50_3']
-    contexts = ['resnet50_crops_final_round2_{}'.format(idx) for idx in range(5)]
+    # contexts = ['resnet50_crops_final_round2_{}'.format(idx) for idx in range(5)]
+    contexts = ['resnet50_crops_final_round2_{}'.format(idx) for idx in range(3,5)]
     # contexts = ['resnet50_crops_final_{}'.format(idx) for idx in range(5)]
     # contexts = ['resnet50_fullcropped6_{}'.format(idx) for idx in range(3)]
     train_from_scratch(source_folder, target_folder, contexts, num_classes, ngpus=ngpus)
