@@ -21,6 +21,18 @@ def yolo_poses_in_folder(pose_folder, target_folder, od):
             img_show = od.crop_largest_person( img )
             img_show.save( target_fp, os.path.splitext(target_fp)[1][1:].upper() )
 
+def yolo_flat(flat_folder, target_parent_folder, od):
+    target_folder = os.path.join( target_parent_folder, flat_folder )
+    print('target_folder: {}'.format(target_folder))
+    if not os.path.exists( target_folder ):
+        os.makedirs( target_folder )
+    for im in os.listdir(flat_folder):
+        src = os.path.join( flat_folder, im )
+        dst = os.path.join( target_folder, im )
+        img = Image.open(src)
+        img_show = od.crop_largest_person( img )
+        img_show.save( dst, 'PNG' )
+
 
 if __name__ == '__main__':
     objs_lists = ['person']
@@ -29,8 +41,18 @@ if __name__ == '__main__':
     # od = ObjDetector( det_classes = objs_lists, threshold = od_threshold)
     od = YOLO(threshold=od_threshold)
 
-    parent_folder = '/home/angeugn/Workspace/aicamp/data/full_data/train'
-    target_folder = '/home/angeugn/Workspace/aicamp/data/full_data/train_yoloed'
+    # parent_folder = '/home/dh/Workspace/aicamp/data/TIL2019_v1.3/trainset_5classes_20406/train/ChestBump'
+    target_folder = '/home/dh/Workspace/aicamp/data/cropped_data/TIL2019_v1.3'
+
+    # 11classes = ['ChairPose','ChildPose','Dabbing', 'HandGun', 'HandShake', 'HulkSmash', 'KoreanHeart', 'KungfuCrane', 'KungfuSalute', 'Salute', 'WarriorPose']
+    # 11classes = ['ChairPose','ChildPose']
+    # 4classes = ['ChestBump', 'EaglePose', 'HighKneel', 'Spiderman']
+
+    folders = ['/home/dh/Workspace/aicamp/data/TIL2019_v1.3/trainset_11classes_00000/val/{}'.format(s) for s in ['ChairPose','ChildPose','Dabbing', 'HandGun', 'HandShake', 'HulkSmash', 'KoreanHeart', 'KungfuCrane', 'KungfuSalute', 'Salute', 'WarriorPose'] ]
+    for parent_folder in folders:
+        yolo_flat( parent_folder, target_folder, od )
+
+    exit()
 
     # count = 0
 

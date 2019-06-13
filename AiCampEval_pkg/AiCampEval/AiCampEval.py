@@ -44,21 +44,28 @@ def eval_submit(test_model, submission_type, team_secret, batch_size=400):
     url = urljoin(baseurl, tar_fn)
 
     derek_folder = '/tmp/derek_'+str(submission_type)
-    if not os.path.exists(derek_folder):
-        print('\nBeginning file download of test images')
-        wget.download(url, derek_folder+'.tar')
+    if os.path.exists(derek_folder):
+        # os.remove(derek_folder)
+        shutil.rmtree(derek_folder)
+    if os.path.exists(derek_folder+'.tar'):
+        os.remove(derek_folder+'.tar')
+ 
+    # if not os.path.exists(derek_folder):
+    print('\nBeginning file download of test images')
+    wget.download(url, derek_folder+'.tar')
+    try:
+        tar = tarfile.open(derek_folder+'.tar', "r:xz")
+    except:
         try:
-            tar = tarfile.open(derek_folder+'.tar', "r:xz")
+            tar = tarfile.open(derek_folder+'.tar', "r:gz")
         except:
-            try:
-                tar = tarfile.open(derek_folder+'.tar', "r:gz")
-            except:
-                tar = tarfile.open(derek_folder+'.tar', "r:")
-        tar.extractall(path=derek_folder)
-        tar.close()
-        end = time.time()
-        print('\nTime taken for download: {:.3f}s'.format(end-start))
-    # derek_folder = derek_folder + '/' + str(submission_type)
+            tar = tarfile.open(derek_folder+'.tar', "r:")
+    tar.extractall(path=derek_folder)
+    tar.close()
+    end = time.time()
+    print('\nTime taken for download: {:.3f}s'.format(end-start))
+
+# derek_folder = derek_folder + '/' + str(submission_type)
     test_imgs_all_unsorted = os.listdir(derek_folder)
     test_imgs_all = []
     # push a file, if any, named BINGO.png to the front of the list test_imgs_all

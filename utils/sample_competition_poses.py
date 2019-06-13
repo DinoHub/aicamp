@@ -68,7 +68,7 @@ def groupby_pids(pose_dirp):
     pose_dict = defaultdict(list)
     img_names = os.listdir( pose_dirp )
     for img_name in img_names:
-        _, pid = img_name.split('_')
+        pid, _ = img_name.split('_')
         pose_dict[pid].append( img_name )
     return pose_dict
 
