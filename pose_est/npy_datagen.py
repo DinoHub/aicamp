@@ -13,6 +13,7 @@ class NpyDataGenerator(keras.utils.Sequence):
         self.batch_size = batch_size
         self.labels = labels
         self.list_IDs = list_IDs
+        self.samples = len(list_IDs)
         self.data_root = data_root
         assert os.path.isdir(self.data_root),'data root given not a directory!'
         self.n_channels = n_channels
@@ -61,7 +62,7 @@ class NpyDataGenerator(keras.utils.Sequence):
             X[i,] = resized/255.
 
             # Store class
-            y[i] = self.labels[i]
+            y[i] = self.labels[ID]
 
         return X, keras.utils.to_categorical(y, num_classes=self.n_classes)
 
