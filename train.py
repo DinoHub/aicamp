@@ -346,24 +346,24 @@ def train_from_scratch(source_folder, target_folder, contexts, num_classes, save
         bs, target_size, model = get_model(context, num_classes)
         # if ngpus > 1:
         #     model = multi_gpu_model(model, gpus=ngpus, cpu_relocation=True)
-        model.compile(optimizer=optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True),
-                      loss='categorical_crossentropy',
-                      metrics=['accuracy'])
-        # model.compile(optimizer='adam',
+        # model.compile(optimizer=optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True),
         #               loss='categorical_crossentropy',
         #               metrics=['accuracy'])
+        model.compile(optimizer='adam',
+                      loss='categorical_crossentropy',
+                      metrics=['accuracy'])
         csvLogger = CSVLogger('logs/{}.log'.format(context))
         valLossCP = ModelCheckpoint('models/{}/{}_loss.hdf5'.format(context, context), save_best_only=True)
         valAccCP = ModelCheckpoint('models/{}/{}_acc.hdf5'.format(context, context), monitor='val_acc', save_best_only=True)
         tbCallback = TensorBoard( log_dir='./tblogs/{}_tblogs'.format(context), histogram_freq=0, write_graph=True, write_images=True )
-        lrCallback = LearningRateScheduler(scheduler, verbose=1)
-        # lrCallback=None
+        # lrCallback = LearningRateScheduler(scheduler, verbose=1)
+        lrCallback=None
 
         # progressive scaling
         # scales = [(75,75), (150,150), (224,224)]
         # epochses = [10, 10, 200]
         scales = [(224,224)]
-        epochses = [150]
+        epochses = [200]
         for scale, epochs in zip(scales, epochses):
             train_at_scale(model, scale, csvLogger, valLossCP, valAccCP, tbCallback, lrCallback, {'preprocessing_function': finder(context)}, bs, train_folder, val_folder, epochs)
 
@@ -398,14 +398,14 @@ if __name__ == '__main__':
     print('Num of GPUs visible to me: {}'.format(ngpus))
     print(gpus)
 
-    base_data_folder = 'data/TIL2019_v1.3_bodycrops'
+    base_data_folder = 'data/TIL2019_v1.3'
 
     num_classes = get_num_classes(base_data_folder)
 
     # This is the folder from which we draw all train/val splits
     source_folder = os.path.join( base_data_folder, 'train' )
     # The path where we create the train and val folders for training and validation
-    target_folder = os.path.join( base_data_folder, 'split_res' )
+    target_folder = os.path.join( base_data_folder, 'split_x' )
     # train_folder = 'data/TIL2019_v0.1_yoloed/split/train'
     # val_folder = 'data/TIL2019_v0.1_yoloed/split/val'
 
@@ -414,8 +414,8 @@ if __name__ == '__main__':
     # contexts = ['inception_resnet_v2', 'inception_resnet_v2_255', 'inception_v3', 'inception_v3_255', 'xception', 'xception_255']
     # contexts = ['resnet50_1', 'resnet50_2', 'resnet50_3']
     # contexts = ['resnet50_crops_final_round2_{}'.format(idx) for idx in range(5)]
-    contexts = ['resnet50_crops_final_round2_{}'.format(idx) for idx in range(3,5)]
-    # contexts = ['resnet50_crops_final_{}'.format(idx) for idx in range(5)]
+    contexts = ['xception_full_final_{}'.format(idx) for idx in range(5)]
+    # contexts += ['xception_full_final_{}'.format(idx) for idx in range(5)]
     # contexts = ['resnet50_fullcropped6_{}'.format(idx) for idx in range(3)]
     train_from_scratch(source_folder, target_folder, contexts, num_classes, ngpus=ngpus)
     # resume_train(train_folder, val_folder, 'inception_v3', 'models/inception_v3/inception_v3_acc.hdf5', (224,224), 100, 64)
