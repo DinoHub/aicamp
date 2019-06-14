@@ -7,7 +7,7 @@ sources = ['/home/dh/Workspace/aicamp/data/TIL2019_v1.3/trainset_5classes_20406/
 '/home/dh/Workspace/aicamp/data/TIL2019_v1.3/trainset_11classes_00000/val'
 ]
 
-target = '/home/dh/Workspace/aicamp/data/TIL2019_v1.3_bodycrops/train'
+target = '/home/dh/Workspace/aicamp/data/TIL2019_v1.3/train'
 
 for source in sources:
     print(source)
@@ -18,6 +18,8 @@ for source in sources:
                 img_path = os.path.join(pose_dir, img)
                 # print(img_path)
                 tgt_path = os.path.join(target, pose)
+                if not os.path.isdir(tgt_path):
+                    os.makedirs(tgt_path)
                 tgt_path = os.path.join(tgt_path, img)
                 # print(tgt_path)
                 copy(img_path, tgt_path)
